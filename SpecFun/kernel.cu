@@ -62,11 +62,11 @@ double Gamma(double x) {
 /// <param name="v"> порядок функции </param>
 /// <param name="result"> полученные значения </param>
 /// <param name="size"> количество точек </param>
-void J(double* x, double v, double* res, int n) {
+void J(const double* x, const double v, double* res, const unsigned int size) {
     double eps = 1E-12;
     double aNext;
     double diff;
-    for (int i = 0; i < n; i++) {
+    for (int i = 0; i < size; i++) {
         int k = 0;
         double aprev = 1 / Gamma(v + 1);
         double summ = aprev;
@@ -114,7 +114,7 @@ __global__ void BesselOneThread(const double* x, const double v, const double ga
 /// <param name="v"> порядок функции </param>
 /// <param name="result"> полученные значения </param>
 /// <param name="size"> количество точек </param>
-cudaError_t BesselWithCuda(const double* x, const double v, double* result, unsigned int size)
+cudaError_t BesselWithCuda(const double* x, const double v, double* result, const unsigned int size)
 {
     double* dev_x = 0;
     double* dev_res = 0;
