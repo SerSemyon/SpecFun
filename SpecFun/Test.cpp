@@ -16,13 +16,13 @@ unsigned int FindExecutionTime(void method())
 
 void TestBessel()
 {
-    int n = 50;
+    int n = 5000;
     double* x = new double[n];
     double* resGPU = new double[n];
     double* resCPU = new double[n];
     for (int i = 0; i < n; i++)
     {
-        x[i] = 0.1 * i;
+        x[i] = 0.01 * i;
     }
     BesselWithCuda(x, 2, resGPU, n);
     J(x, 2, resCPU, n);
@@ -30,7 +30,7 @@ void TestBessel()
     {
         if (abs(resGPU[i] - resCPU[i]) > 1E-12)
         {
-            std::cout << "WARNING!!!TestBessel failed!" << std::endl;
+            std::cout << "WARNING!!!TestBessel failed! " << i << " " << abs(resGPU[i] - resCPU[i])  << std::endl;
             return;
         }
         //std::cout << x[i] << '\t' << resGPU[i] << " " << resCPU[i] << std::endl;
