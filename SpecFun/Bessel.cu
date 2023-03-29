@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include "CPUfunctions.h"
 #include "GPUfunctions.h"
+#include <iostream>
 
 /// <summary>
 /// Код одной нити GPU
@@ -16,14 +17,17 @@
 __global__ void BesselOneThread(const double* x, const double v, const double gamma, double* result, int N)
 {
     int i = threadIdx.x + blockIdx.x * blockDim.x;
+    double eps = 1E-12;
+    double aNext;
+    double diff;
+    int k;
+    double aprev;
+    double summ;
     while (i < N)
     {
-        double eps = 1E-12;
-        double aNext;
-        double diff;
-        int k = 0;
-        double aprev = 1 / gamma;
-        double summ = aprev;
+        k = 0;
+        aprev = 1 / gamma;
+        summ = aprev;
         do {
             aNext = -x[i] * x[i] * aprev / ((k + 1) * (v + k + 1) * 4);
             summ += aNext;
