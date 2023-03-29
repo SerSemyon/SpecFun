@@ -82,7 +82,18 @@
     </CudaCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <CudaCompile Include="Bessel.cu" />
     <CudaCompile Include="kernel.cu" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="BesselCPU.cpp" />
+    <ClCompile Include="GammaFunction.cpp" />
+    <ClCompile Include="Test.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="CPUfunctions.h" />
+    <ClInclude Include="GPUfunctions.h" />
+    <ClInclude Include="Test.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
