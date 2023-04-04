@@ -48,5 +48,32 @@ void TestBessel()
         }
         //std::cout << x[i] << '\t' << resGPU[i] << " " << resCPU[i] << std::endl;
     }
-    std::cout << " TestBessel OK" << std::endl;
+    std::cout << "TestBessel OK" << std::endl;
+}
+
+double T_recursively(int n, double x)
+{
+    if (n == 0)
+        return 1;
+    if (n == 1)
+        return x;
+    return 2 * x * T_recursively(x, n - 1) - T_recursively(x, n - 2);
+}
+
+void TestChebyshevPolynomials()
+{
+    double t1, t2;
+    bool successfully = true;
+    for (int i = 0; i < 11; i++)
+    {
+        t1 = T_recursively(0.2, i);
+        t2 = T(0.2, i);
+        if (t1 != t2)
+        {
+            std::cout << "WARNING!!!TestChebyshevPolynomials failed! T_recursively - T = " << t1 - t2 << std::endl;
+            successfully = false;
+        }
+    }
+    if (successfully)
+        std::cout << "TestChebyshevPolynomials OK" << std::endl;
 }

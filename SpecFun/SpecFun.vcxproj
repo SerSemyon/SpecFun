@@ -87,6 +87,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="BesselCPU.cpp" />
+    <ClCompile Include="ChebyshevPolynomials.cpp" />
     <ClCompile Include="GammaFunction.cpp" />
     <ClCompile Include="Test.cpp" />
   </ItemGroup>

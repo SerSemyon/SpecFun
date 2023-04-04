@@ -2,3 +2,4 @@
 
 unsigned int FindExecutionTime(void method());
 void TestBessel();
+void TestChebyshevPolynomials();
