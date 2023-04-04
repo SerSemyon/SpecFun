@@ -5,6 +5,7 @@
 #include "CPUfunctions.h"
 #include <iostream>
 
+double epsilon = 1E-13;
 void TestBessel()
 {
     int n = 1500000;
@@ -41,7 +42,7 @@ void TestBessel()
 
     for (int i = 0; i < n; i++)
     {
-        if (abs(resGPU[i] - resCPU[i]) > 1E-12)
+        if (abs(resGPU[i] - resCPU[i]) > epsilon)
         {
             std::cout << "WARNING!!!TestBessel failed! point:" << x[i] << " |resGPU-resCPU|=" << abs(resGPU[i] - resCPU[i])  << std::endl;
             return;
@@ -57,7 +58,7 @@ double T_recursively(int n, double x)
         return 1;
     if (n == 1)
         return x;
-    return 2 * x * T_recursively(x, n - 1) - T_recursively(x, n - 2);
+    return 2 * x * T_recursively(n - 1, x) - T_recursively(n - 2, x);
 }
 
 void TestChebyshevPolynomials()
@@ -66,11 +67,11 @@ void TestChebyshevPolynomials()
     bool successfully = true;
     for (int i = 0; i < 11; i++)
     {
-        t1 = T_recursively(0.2, i);
-        t2 = T(0.2, i);
-        if (t1 != t2)
+        t1 = T_recursively(i, 0.2);
+        t2 = T(i, 0.2);
+        if ((t1 - t2) > epsilon)
         {
-            std::cout << "WARNING!!!TestChebyshevPolynomials failed! T_recursively - T = " << t1 - t2 << std::endl;
+            std::cout << "WARNING!!!TestChebyshevPolynomials failed! order " << i << "T_recursively - T = " << t1 - t2 << std::endl;
             successfully = false;
         }
     }
