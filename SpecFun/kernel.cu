@@ -10,6 +10,6 @@
 
 int main()
 {
-    //TestBessel();
+    TestBesselCuda();
     TestChebyshevPolynomials();
 }

@@ -9,7 +9,7 @@
 /// <param name="v"> порядок функции </param>
 /// <param name="result"> полученные значения </param>
 /// <param name="size"> количество точек </param>
-void J(const double* x, const double v, double* res, const unsigned int size) {
+void J(const double v, const double* x, double* res, const unsigned int size) {
     double eps = 1E-12;
     double aNext;
     double diff;

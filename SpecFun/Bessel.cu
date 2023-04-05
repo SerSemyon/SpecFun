@@ -14,7 +14,7 @@
 /// <param name="v"> порядок функции </param>
 /// <param name="gamma"> значение гамма функции от (v+1) </param>
 /// <param name="result"> полученные значения </param>
-__global__ void BesselOneThread(const double* x, const double v, const double gamma, double* result, int N)
+__global__ void BesselOneThread(const double v, const double* x, const double gamma, double* result, int N)
 {
     int i = threadIdx.x + blockIdx.x * blockDim.x;
     double eps = 1E-12;
@@ -47,7 +47,7 @@ __global__ void BesselOneThread(const double* x, const double v, const double ga
 /// <param name="v"> порядок функции </param>
 /// <param name="result"> полученные значения </param>
 /// <param name="size"> количество точек </param>
-cudaError_t BesselWithCuda(const double* x, const double v, double* result, const unsigned int size)
+cudaError_t BesselWithCuda(const double v, const double* x, double* result, const unsigned int size)
 {
     double* dev_x = 0;
     double* dev_res = 0;
@@ -72,7 +72,7 @@ cudaError_t BesselWithCuda(const double* x, const double v, double* result, cons
     }
 
     double gamma = Gamma(v + 1);
-    BesselOneThread << <(size+127)/128, 128 >> > (dev_x, v, gamma, dev_res, size);
+    BesselOneThread << <(size+127)/128, 128 >> > (v, dev_x, gamma, dev_res, size);
 
     cudaStatus = cudaGetLastError();
     if (cudaStatus != cudaSuccess) {

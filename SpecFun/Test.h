@@ -1,5 +1,6 @@
 #pragma once
 
 unsigned int FindExecutionTime(void method());
-void TestBessel();
+void TestBesselCPU();
+void TestBesselCuda();
 void TestChebyshevPolynomials();

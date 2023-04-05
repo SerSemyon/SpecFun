@@ -6,7 +6,38 @@
 #include <iostream>
 
 double epsilon = 1E-13;
-void TestBessel()
+
+/* TODO - Встроенная реализация даёт низкую точность и, чем дальше от нуля, тем выше ошибка.
+Поэтому для проверки значений нужно будет использовать таблицы с более точными результатами,иначе тест всегда будет проваливаться. 
+Текущая реализация теста говорит, что тест провален, даже если значения верны. */
+void TestBesselCPU()
+{
+    int v = 1;
+    int n = 1000;
+    bool successfully = true;
+    double* res1 = new double[n];
+    double* res2 = new double[n];
+    double* x = new double[n];
+    for (int i = 0; i < n; i++)
+    {
+        x[i] = i * 0.01;
+        res1[i] = __std_smf_cyl_bessel_i(v, x[i]);
+    }
+    J(v, x, res2, n);
+    for (int i = 0; i < n; i++)
+    {
+        if (abs(res1[i] - res2[i]) > epsilon)
+        {
+            std::cout << "TestBesselCPU failed!" << x[i] << " " << res1[i] << " " << res2[i] << std::endl;
+            successfully = false;
+            break;
+        }
+    }
+    if (successfully)
+        std::cout << "TestBesselCPU OK" << std::endl;
+}
+
+void TestBesselCuda()
 {
     int n = 1500000;
     double* x = new double[n];
@@ -18,7 +49,7 @@ void TestBessel()
     }
 
     unsigned int start_time = clock();
-    J(x, 2, resCPU, n);
+    J(2, x, resCPU, n);
     unsigned int end_time = clock();
     unsigned int search_time = end_time - start_time;
 
@@ -27,7 +58,7 @@ void TestBessel()
     cudaEventCreate(&stop);
     cudaEventRecord(start, 0);
     unsigned int GPUstart_time = clock();
-    BesselWithCuda(x, 2, resGPU, n);
+    BesselWithCuda(2, x, resGPU, n);
     unsigned int GPUend_time = clock();
     unsigned int GPUsearch_time = GPUend_time - GPUstart_time;
     cudaEventRecord(stop, 0);
