@@ -13,6 +13,7 @@ double epsilon = 1E-13;
 “екуща€ реализаци€ теста говорит, что тест провален, даже если значени€ верны. */
 void TestBesselCPU()
 {
+    std::cout << "TestBesselCPU started" << std::endl;
     int v = 1;
     int n = 1000;
     bool successfully = true;
@@ -40,7 +41,7 @@ void TestBesselCPU()
 
 void TestBesselCuda()
 {
-    LOG_DURATION_H("CPU clock");
+    std::cout << "TestBesselCuda started" << std::endl;
     int n = 1500000;
     double* x = new double[n];
     double* resGPU = new double[n];
@@ -51,12 +52,12 @@ void TestBesselCuda()
     }
 
     {
-        LOG_DURATION_H("CPU clock");
+        LOG_DURATION("CPU clock");
         J(2, x, resCPU, n);
     }
 
     {
-        LOG_DURATION_H("GPU clock");
+        LOG_DURATION("GPU clock");
         BesselWithCuda(2, x, resGPU, n);
     }
 
@@ -69,7 +70,7 @@ void TestBesselCuda()
         }
         //std::cout << x[i] << '\t' << resGPU[i] << " " << resCPU[i] << std::endl;
     }
-    std::cout << "TestBessel OK" << std::endl;
+    std::cout << "TestBesselCuda OK" << std::endl;
 }
 
 double T_recursively(int n, double x)
@@ -83,6 +84,8 @@ double T_recursively(int n, double x)
 
 void TestChebyshevPolynomials()
 {
+    LOG_DURATION("TestChebyshevPolynomials");
+    std::cout << "TestChebyshevPolynomials started" << std::endl;
     double t1, t2;
     bool successfully = true;
     for (int i = 0; i < 11; i++)

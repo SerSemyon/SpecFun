@@ -7,6 +7,7 @@
 #include "CPUfunctions.h"
 #include "GPUfunctions.h"
 #include "Test.h"
+#include "log_duration.h"
 
 int main()
 {
