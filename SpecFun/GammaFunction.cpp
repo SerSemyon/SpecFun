@@ -1,8 +1,5 @@
 #include "CPUfunctions.h"
 
-/// <summary>
-/// Вычисление гамма-функции при x>-3
-/// </summary>
 double Gamma(double x) {
     //коэффициенты разложения при |x|<3
     double a[30] = {

@@ -2,14 +2,7 @@
 #include "CPUfunctions.h"
 #include <cmath>
 
-/// <summary>
-/// Вычисление функции Бесселя на CPU
-/// </summary>
-/// <param name="x"> значения параметра </param>
-/// <param name="v"> порядок функции </param>
-/// <param name="result"> полученные значения </param>
-/// <param name="size"> количество точек </param>
-void J(const double v, const double* x, double* res, const unsigned int size) {
+void J(const double v, const double* x, double* result, const unsigned int size) {
     double eps = 1E-12;
     double aNext;
     double diff;
@@ -24,6 +17,6 @@ void J(const double v, const double* x, double* res, const unsigned int size) {
             aprev = aNext;
             k++;
         } while (diff > eps);
-        res[i] = summ * pow(x[i] * 0.5, v);
+        result[i] = summ * pow(x[i] * 0.5, v);
     }
 }

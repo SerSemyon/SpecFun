@@ -40,13 +40,6 @@ __global__ void BesselOneThread(const double v, const double* x, const double ga
     }
 }
 
-/// <summary>
-/// Вычисление функции Бесселя на видеокарте NVidia
-/// </summary>
-/// <param name="x"> значения параметра </param>
-/// <param name="v"> порядок функции </param>
-/// <param name="result"> полученные значения </param>
-/// <param name="size"> количество точек </param>
 cudaError_t BesselWithCuda(const double v, const double* x, double* result, const unsigned int size)
 {
     double* dev_x = 0;

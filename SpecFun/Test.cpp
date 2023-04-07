@@ -4,6 +4,7 @@
 #include "GPUfunctions.h"
 #include "CPUfunctions.h"
 #include <iostream>
+#include "log_duration.h"
 
 double epsilon = 1E-13;
 
@@ -39,6 +40,7 @@ void TestBesselCPU()
 
 void TestBesselCuda()
 {
+    LOG_DURATION_H("CPU clock");
     int n = 1500000;
     double* x = new double[n];
     double* resGPU = new double[n];
@@ -48,28 +50,15 @@ void TestBesselCuda()
         x[i] = 0.0001 * i;
     }
 
-    unsigned int start_time = clock();
-    J(2, x, resCPU, n);
-    unsigned int end_time = clock();
-    unsigned int search_time = end_time - start_time;
+    {
+        LOG_DURATION_H("CPU clock");
+        J(2, x, resCPU, n);
+    }
 
-    cudaEvent_t start, stop;
-    cudaEventCreate(&start);
-    cudaEventCreate(&stop);
-    cudaEventRecord(start, 0);
-    unsigned int GPUstart_time = clock();
-    BesselWithCuda(2, x, resGPU, n);
-    unsigned int GPUend_time = clock();
-    unsigned int GPUsearch_time = GPUend_time - GPUstart_time;
-    cudaEventRecord(stop, 0);
-    cudaEventSynchronize(stop);
-    float elapsedTime;
-    cudaEventElapsedTime(&elapsedTime, start, stop);
-    std::cout << "execution time cuda " << elapsedTime << std::endl;
-    cudaEventDestroy(start);
-    cudaEventDestroy(stop);
-
-    std::cout << "GPU clock:" << GPUsearch_time << " CPU clock:" << search_time << std::endl;
+    {
+        LOG_DURATION_H("GPU clock");
+        BesselWithCuda(2, x, resGPU, n);
+    }
 
     for (int i = 0; i < n; i++)
     {
