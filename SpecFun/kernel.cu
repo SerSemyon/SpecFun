@@ -11,6 +11,7 @@
 
 int main()
 {
+    TestJ0();
     TestBesselCuda();
     TestChebyshevPolynomials();
 }

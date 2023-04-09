@@ -39,6 +39,40 @@ void TestBesselCPU()
         std::cout << "TestBesselCPU OK" << std::endl;
 }
 
+void TestJ0()
+{
+    std::cout << "TestBesselCPU started" << std::endl;
+    int v = 0;
+    int n = 1000;
+    bool successfully = true;
+    double* res1 = new double[n];
+    double* res2 = new double[n];
+    double* x = new double[n];
+    for (int i = 0; i < n; i++)
+    {
+        x[i] = i * 0.001;
+    }
+    {
+        LOG_DURATION("J");
+        J(v, x, res1, n);
+    }
+    {
+        LOG_DURATION("J0");
+        J_0(x, res2, n);
+    }
+    for (int i = 0; i < n; i++)
+    {
+        if (abs(res1[i] - res2[i]) > epsilon)
+        {
+            std::cout << "TestJ0 failed!" << x[i] << " " << res1[i] << " " << res2[i] << std::endl;
+            successfully = false;
+            break;
+        }
+    }
+    if (successfully)
+        std::cout << "TestBesselCPU OK" << std::endl;
+}
+
 void TestBesselCuda()
 {
     std::cout << "TestBesselCuda started" << std::endl;
