@@ -1,5 +1,13 @@
 #include "CPUfunctions.h"
 
+long long Fact(int x) {
+    long long res = 1;
+    for (int i = 2; i <= x; i++) {
+        res *= i;
+    }
+    return res;
+}
+
 double Gamma(double x) {
     //коэффициенты разложения при |x|<3
     double a[30] = {

@@ -11,6 +11,7 @@
 
 int main()
 {
+    TestNeumannCPU();
     TestJ0();
     TestBesselCuda();
     TestChebyshevPolynomials();
