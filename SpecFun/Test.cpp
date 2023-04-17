@@ -137,6 +137,39 @@ void TestBesselCuda()
     std::cout << "TestBesselCuda OK" << std::endl;
 }
 
+void TestBesselNew() {
+    std::cout << "TestBesselNew started" << std::endl;
+    int n = 256;
+    double* x = new double[n];
+    double* resGPU = new double[n];
+    double* resCPU = new double[n];
+    for (int i = 0; i < n; i++)
+    {
+        x[i] = 0.0001 * i;
+    }
+
+    {
+        LOG_DURATION("CPU clock");
+        J(2, x, resCPU, n);
+    }
+
+    {
+        LOG_DURATION("GPU clock");
+        BesselWithCudaNew(2, x, resGPU, n);
+    }
+
+    for (int i = 0; i < n; i++)
+    {
+        if (abs(resGPU[i] - resCPU[i]) > 1E-13)
+        {
+            std::cout << "WARNING!!!TestBessel failed! point:" << x[i] << " |resGPU-resCPU|=" << abs(resGPU[i] - resCPU[i]) << std::endl;
+            return;
+        }
+        //std::cout << x[i] << '\t' << resGPU[i] << " " << resCPU[i] << std::endl;
+    }
+    std::cout << "TestBesselNew OK" << std::endl;
+}
+
 double T_recursively(int n, double x)
 {
     if (n == 0)

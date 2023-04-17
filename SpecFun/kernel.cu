@@ -11,6 +11,7 @@
 
 int main()
 {
+    TestBesselNew();
     TestNeumannCPU();
     TestJ0();
     TestBesselCuda();

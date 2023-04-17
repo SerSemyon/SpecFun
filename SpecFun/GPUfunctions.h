@@ -10,3 +10,4 @@
 /// <param name="result"> полученные значения </param>
 /// <param name="size"> количество точек </param>
 cudaError_t BesselWithCuda(const double v, const double* x, double* result, const unsigned int size);
+cudaError_t BesselWithCudaNew(const double v, const double* x, double* result, const unsigned int size);
