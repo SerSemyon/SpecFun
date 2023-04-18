@@ -8,6 +8,15 @@ long long Fact(int x);
 double Gamma(double x);
 
 /// <summary>
+/// Вычисление функции порядка v+1 через значения порядка v и v-1
+/// </summary>
+/// <param name="v"> порядок функции </param>
+/// <param name="x"> значения параметра </param>
+/// <param name="value_v"> значение порядка v </param>
+/// <param name="value_v_minus_1"> значение порядка v-1 </param>
+double cyl_next_order(double v, double x, double value_v, double value_v_minus_1);
+
+/// <summary>
 /// Вычисление функции Бесселя на CPU для одной точки
 /// </summary>
 /// <param name="v"> порядок функции </param>

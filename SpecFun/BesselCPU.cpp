@@ -2,6 +2,11 @@
 #include "CPUfunctions.h"
 #include <cmath>
 
+double cyl_next_order(double x, double v, double value_v, double value_v_minus_1)
+{
+	return 2 * v * value_v / x - value_v_minus_1;
+}
+
 void J(const double v, const double* x, double* result, const unsigned int size) {
     double eps = 1E-12;
     double aNext;
