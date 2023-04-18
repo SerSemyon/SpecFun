@@ -78,7 +78,7 @@ void Neumann(double v, double* x, double* res, int n, double* Jpositive, double*
 /// Вычисление функции Неймана нулевого порядка на (0;8]
 /// </summary>
 /// <param name="x"> Значение параметра </param>
-double Y_0(double x);
+double Y_0(double x, double J0);
 
 /// <summary>
 /// Вычисление функции Неймана нулевого порядка на (0;8]

@@ -42,20 +42,33 @@ void TestBesselCPU()
 void TestNeumannCPU()
 {
     std::cout << "TestNeumannCPU started" << std::endl;
-    int v = 1;
-    int n = 100;
+    int v = 0;
+    int n = 1000000;
     bool successfully = true;
     double* res1 = new double[n];
     double* res2 = new double[n];
+    double* res3 = new double[n];
     double* x = new double[n];
     for (int i = 0; i < n; i++)
     {
-        x[i] = i * 0.01;
+        x[i] = i * 0.00000001;
         res1[i] = __std_smf_cyl_neumann(v, x[i]);
     }
     double* Js = new double[n];
     J(v, x, Js, n);
-    Neumann(v, x, res2, n, Js);
+    {
+        LOG_DURATION("Y_0");
+        for (int i = 0; i < n; i++)
+        {
+            res3[i] = Y_0(x[i], Js[i]);
+        }
+    }
+    {
+        LOG_DURATION("Neumann");
+        Neumann(v, x, res2, n, Js);
+    }
+    //for (int i = 0; i < 10; i++)
+      //  std::cout << res1[i] << " " << res2[i] << " " << res3[i] << std::endl;
     for (int i = 0; i < n; i++)
     {
         if (abs(res1[i] - res2[i]) > 1E-4)
