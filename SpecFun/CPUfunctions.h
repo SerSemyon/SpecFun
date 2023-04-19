@@ -69,7 +69,6 @@ double T(int n, double x);
 /// <param name="res"> результат вычислений </param>
 /// <param name="n"> количество точек </param>
 /// <param name="Jpositive"> значения функции Бесселя порядка v </param>
-/// <param name="Jnegative"> значения функции Бесселя порядка -v </param>
 void Neumann(int v, double* x, double* res, int n, double* Jpositive);
 
 /// <summary>
