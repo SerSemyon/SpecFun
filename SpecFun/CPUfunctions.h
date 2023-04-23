@@ -36,23 +36,13 @@ void J(const double v, const double* x, double* result, const unsigned int size)
 /// Вычисление функции Бесселя нулевого порядка на отрезке [-8;8] 
 /// </summary>
 /// <param name="x"> Значение параметра </param>
-double J_0(const double x);
+double J_0(double x);
 
 /// <summary>
 /// Вычисление функции Бесселя нулевого порядка на отрезке [-8;8] 
 /// </summary>
 /// <param name="x"> Значение параметра </param>
-/// <param name="res"> Указатель на результат </param>
-/// <param name="n"> Количество точек </param>
-void J_0(const double* const x, double* res, const unsigned int n);
-
-/// <summary>
-/// Вычисление функции Бесселя первого порядка на отрезке [-8;8] 
-/// </summary>
-/// <param name="x"> Значение параметра </param>
-/// <param name="res"> Указатель на результат </param>
-/// <param name="n"> Количество точек </param>
-void J_1(const double* const x, double* res, const unsigned int n);
+double J_1(double x);
 
 /// <summary>
 /// Вычисление полинома Чебышёва первого рода
@@ -92,16 +82,4 @@ double Y_0(double x, double J0);
 /// Вычисление функции Неймана нулевого порядка на (0;8]
 /// </summary>
 /// <param name="x"> Значение параметра </param>
-/// <param name="res"> Указатель на результат </param>
-/// <param name="n"> Количество точек </param>
-/// <param name="J0"> Вычисленные значения фукнции Бесселя </param>
-void Y_0(const double* const x, double* res, int n, const double* const J0);
-
-/// <summary>
-/// Вычисление функции Неймана первого порядка на (0;8]
-/// </summary>
-/// <param name="x"> Значение параметра </param>
-/// <param name="res"> Указатель на результат </param>
-/// <param name="n"> Количество точек </param>
-/// <param name="J1"> Вычисленные значения фукнции Бесселя </param>
-void Y_1(const double* const x, double* res, int n, const double* const J1);
+double Y_1(double x, double J1);

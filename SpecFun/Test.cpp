@@ -6,7 +6,7 @@
 #include <iostream>
 #include "log_duration.h"
 
-double epsilon = 1E-13;
+double epsilon = 1E-15;
 
 /* TODO - Встроенная реализация даёт низкую точность и, чем дальше от нуля, тем выше ошибка.
 Поэтому для проверки значений нужно будет использовать таблицы с более точными результатами,иначе тест всегда будет проваливаться. 
@@ -23,7 +23,7 @@ void TestBesselCPU()
     for (int i = 0; i < n; i++)
     {
         x[i] = i * 0.01;
-        res1[i] = __std_smf_cyl_bessel_i(v, x[i]);
+        res1[i] = std::cyl_bessel_i(v, x[i]);//__std_smf_cyl_bessel_i(v, x[i]);
     }
     J(v, x, res2, n);
     for (int i = 0; i < n; i++)
@@ -101,7 +101,10 @@ void TestJ0()
     }
     {
         LOG_DURATION("J0");
-        J_0(x, res2, n);
+        for (int i = 0; i < n; i++)
+        {
+            res2[i] = J_0(x[i]);
+        }
     }
     for (int i = 0; i < n; i++)
     {
