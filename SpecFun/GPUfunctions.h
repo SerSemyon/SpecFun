@@ -9,5 +9,29 @@
 /// <param name="x"> значения параметра </param>
 /// <param name="result"> полученные значения </param>
 /// <param name="size"> количество точек </param>
-cudaError_t BesselWithCuda(const double v, const double* x, double* result, const unsigned int size);
-cudaError_t BesselWithCudaNew(const double v, const double* x, double* result, const unsigned int size);
+void BesselWithCuda(const double v, const double* const x, double* result, const unsigned int size);
+//cudaError_t BesselWithCudaNew(const double v, const double* x, double* result, const unsigned int size);
+
+/// <summary>
+/// Вычисление функции Бесселя нулевого порядка на отрезке [-8;8] 
+/// </summary>
+/// <param name="x"> Значение параметра </param>
+void J0_CUDA(const double* const x, double* result, const unsigned int size);
+
+/// <summary>
+/// Вычисление функции Бесселя нулевого порядка на отрезке [-8;8] 
+/// </summary>
+/// <param name="x"> Значение параметра </param>
+void J1_CUDA(const double* const x, double* result, const unsigned int size);
+
+/// <summary>
+/// Вычисление функции Неймана нулевого порядка на (0;8]
+/// </summary>
+/// <param name="x"> Значение параметра </param>
+void Y0_CUDA(const double* const x, double* result, const unsigned int size, const double* const J0);
+
+/// <summary>
+/// Вычисление функции Неймана нулевого порядка на (0;8]
+/// </summary>
+/// <param name="x"> Значение параметра </param>
+void Y1_CUDA(const double* const x, double* result, const unsigned int size, const double* const J0);

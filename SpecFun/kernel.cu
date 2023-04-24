@@ -14,8 +14,9 @@ int main()
     TestBesselCPU();
     TestJ0();
     TestJ1();
-    TestBesselNew();
-    TestBesselCuda();
+    //TestBesselNew();
+    TestBessel_CUDA();
+    TestJ0_CUDA();
     TestNeumannCPU();
     TestY0();
     TestY1();

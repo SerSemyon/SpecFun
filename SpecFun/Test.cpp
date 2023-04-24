@@ -230,9 +230,10 @@ void TestY1()
         std::cout << "TestY1 OK" << std::endl << std::endl;
 }
 
-void TestBesselCuda()
+void TestBessel_CUDA()
 {
     std::cout << "TestBesselCuda started" << std::endl;
+    int v = 1;
     int n = 1500000;
     double* x = new double[n];
     double* resGPU = new double[n];
@@ -244,12 +245,12 @@ void TestBesselCuda()
 
     {
         LOG_DURATION("CPU clock");
-        J(2, x, resCPU, n);
+        J(v, x, resCPU, n);
     }
 
     {
         LOG_DURATION("GPU clock");
-        BesselWithCuda(2, x, resGPU, n);
+        BesselWithCuda(v, x, resGPU, n);
     }
 
     for (int i = 0; i < n; i++)
@@ -257,47 +258,81 @@ void TestBesselCuda()
         if (abs(resGPU[i] - resCPU[i]) > epsilon)
         {
             std::cout << "WARNING!!!" << std::endl;
-            std::cout << "WARNING!!!TestBesselCuda failed! point:" << x[i] << " |resGPU-resCPU|=" << abs(resGPU[i] - resCPU[i])  << std::endl << std::endl;
+            std::cout << "TestBesselCuda failed! point:" << x[i] << " |resGPU-resCPU|=" << abs(resGPU[i] - resCPU[i])  << std::endl << std::endl;
             return;
         }
-        //std::cout << x[i] << '\t' << resGPU[i] << " " << resCPU[i] << std::endl;
     }
     std::cout << "TestBesselCuda OK" << std::endl << std::endl;
 }
 
-void TestBesselNew() {
-    std::cout << "TestBesselNew started" << std::endl;
-    int n = 256;
+void TestJ0_CUDA()
+{
+    std::cout << "TestJ0_CUDA started" << std::endl;
+    int v = 0;
+    int n = 1000000;
     double* x = new double[n];
-    double* resGPU = new double[n];
-    double* resCPU = new double[n];
+    double* res1 = new double[n];
+    double* res2 = new double[n];
     for (int i = 0; i < n; i++)
     {
-        x[i] = 0.0001 * i;
+        x[i] = i * 0.00000001;
     }
 
     {
         LOG_DURATION("CPU clock");
-        J(2, x, resCPU, n);
+        BesselWithCuda(v, x, res1, n);
     }
 
     {
         LOG_DURATION("GPU clock");
-        BesselWithCudaNew(2, x, resGPU, n);
+        J0_CUDA(x, res2, n);
     }
 
     for (int i = 0; i < n; i++)
     {
-        if (abs(resGPU[i] - resCPU[i]) > 1E-13)
+        if (abs(res1[i] - res2[i]) > epsilon)
         {
             std::cout << "WARNING!!!" << std::endl;
-            std::cout << "TestBessel failed! point:" << x[i] << " |resGPU-resCPU|=" << abs(resGPU[i] - resCPU[i]) << std::endl << std::endl;
+            std::cout << "TestJ0_CUDA failed! point:" << x[i] << " |res1-resCPU|=" << abs(res1[i] - res2[i]) << std::endl << std::endl;
             return;
         }
-        //std::cout << x[i] << '\t' << resGPU[i] << " " << resCPU[i] << std::endl;
     }
-    std::cout << "TestBesselNew OK" << std::endl << std::endl;
+    std::cout << "TestJ0_CUDA OK" << std::endl << std::endl;
 }
+
+//void TestBesselNew() {
+//    std::cout << "TestBesselNew started" << std::endl;
+//    int n = 256;
+//    double* x = new double[n];
+//    double* resGPU = new double[n];
+//    double* resCPU = new double[n];
+//    for (int i = 0; i < n; i++)
+//    {
+//        x[i] = 0.0001 * i;
+//    }
+//
+//    {
+//        LOG_DURATION("CPU clock");
+//        J(2, x, resCPU, n);
+//    }
+//
+//    {
+//        LOG_DURATION("GPU clock");
+//        BesselWithCudaNew(2, x, resGPU, n);
+//    }
+//
+//    for (int i = 0; i < n; i++)
+//    {
+//        if (abs(resGPU[i] - resCPU[i]) > 1E-13)
+//        {
+//            std::cout << "WARNING!!!" << std::endl;
+//            std::cout << "TestBessel failed! point:" << x[i] << " |resGPU-resCPU|=" << abs(resGPU[i] - resCPU[i]) << std::endl << std::endl;
+//            return;
+//        }
+//        //std::cout << x[i] << '\t' << resGPU[i] << " " << resCPU[i] << std::endl;
+//    }
+//    std::cout << "TestBesselNew OK" << std::endl << std::endl;
+//}
 
 double T_recursively(int n, double x)
 {
