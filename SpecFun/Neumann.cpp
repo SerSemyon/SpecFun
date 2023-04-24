@@ -102,24 +102,17 @@ const double b0[] = {
 };
 
 double Y_0(double x, double J0) {
-	double x0 = x;
-	x = x / 8.0; x = 2.0 * x * x - 1.0;
-	double T0 = 1.0; double T1 = x;
+	double T2 = x / 8.0;
+	T2 = 2.0 * T2 * T2 - 1.0;
+	double T_previous = 1.0; double T_current = T2;
 	double T;
-	double a_prev = b0[1] * T1;
-	double sum = b0[0] * T0 + a_prev;
-	double diff;
+	double sum = b0[0] * T_previous + b0[1] * T_current;
 	for (int n = 2; n <= 17; n++) {
-		T = 2.0 * x * T1 - T0;
-		double a = b0[n] * T;
-		sum += a;
-		diff = abs(a - a_prev);
-		if (diff < eps)
-			break;
-		a_prev = a;
-		T0 = T1; T1 = T;
+		T = 2.0 * T2 * T_current - T_previous;
+		sum += b0[n] * T;
+		T_previous = T_current; T_current = T;
 	};
-	sum = sum + (log(x0 / 2.0) + C) * J0 * 2.0 / M_PI;
+	sum += (log(x / 2.0) + C) * J0 * 2.0 / M_PI;
 	return sum;
 };
 
@@ -146,16 +139,16 @@ const double b1[] = {
 
 double Y_1(double x, double J1) {
 	double z = x / 8.0;
-	double s = 0.0, T0 = 1.0, T1 = z;
+	double T_previous = 1.0, T_current = z;
 	double T;
-	s = s + b1[0] * T1;
+	double s = b1[0] * T_current;
 	for (int n = 1; n <= 17; n++) {
-		T = 2.0 * z * T1 - T0;
-		T0 = T1; T1 = T;
-		T = 2.0 * z * T1 - T0;
-		s = s + b1[n] * T;
-		T0 = T1; T1 = T;
+		T = 2.0 * z * T_current - T_previous;
+		T_previous = T_current; T_current = T;
+		T = 2.0 * z * T_current - T_previous;
+		s += b1[n] * T;
+		T_previous = T_current; T_current = T;
 	};
-	s = s + (C + log(x / 2.0)) * J1 * 2.0 / M_PI - 2.0 / (M_PI * x);
+	s += (C + log(x / 2.0)) * J1 * 2.0 / M_PI - 2.0 / (M_PI * x);
 	return s;
 };

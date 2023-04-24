@@ -177,8 +177,8 @@ __global__ void J0_OneThread(const double* x, double* result, int size)
         0.00000'00000'00000'01222,
         -0.00000'00000'00000'00017
     };
-    int i = threadIdx.x + blockIdx.x * blockDim.x;
     const double eps = 1E-12;
+    int i = threadIdx.x + blockIdx.x * blockDim.x;
     while (i < size)
     {
         double z = x[i] / 8.0; z = 2.0 * z * z - 1.0;
@@ -205,6 +205,75 @@ void J0_CUDA(const double* const x, double* result, const unsigned int size)
     cudaMemcpy(dev_x, x, size * sizeof(double), cudaMemcpyHostToDevice);
 
     J0_OneThread << <(size + 127) / 128, 128 >> > (dev_x, dev_res, size);
+
+    cudaGetLastError();
+    cudaDeviceSynchronize();
+    cudaMemcpy(result, dev_res, size * sizeof(double), cudaMemcpyDeviceToHost);
+
+    cudaFree(dev_res);
+    cudaFree(dev_x);
+}
+
+/// <summary>
+/// Код одной нити GPU
+/// </summary>
+/// <param name="x"> значения параметра </param>
+/// <param name="v"> порядок функции </param>
+/// <param name="gamma"> значение гамма функции от (v+1) </param>
+/// <param name="result"> полученные значения </param>
+__global__ void J1_OneThread(const double* x, double* result, int size)
+{
+    const double a1[18] =
+    {
+        0.05245'81903'34656'48458,
+        0.04809'64691'58230'37394,
+        0.31327'50823'61567'18380,
+        -0.24186'74084'47407'48475,
+        0.07426'67962'16787'03781,
+        -0.01296'76273'11735'17510,
+        0.00148'99128'96667'63839,
+        -0.00012'22786'85054'32427,
+        0.00000'75626'30229'69605,
+        -0.00000'03661'30855'23363,
+        0.00000'00142'77324'38731,
+        -0.00000'00004'58570'03076,
+        0.00000'00000'12351'74811,
+        -0.00000'00000'00283'17735,
+        0.00000'00000'00005'59509,
+        -0.00000'00000'00000'09629,
+        0.00000'00000'00000'00146,
+        -0.00000'00000'00000'00002
+    };
+    const double eps = 1E-12;
+    int i = threadIdx.x + blockIdx.x * blockDim.x;
+    while (i < size)
+    {
+        double z = x[i] / 8.0;
+        double s = 0.0, T0 = 1.0, T1 = z;
+        double T;
+        s = s + a1[0] * T1;
+        for (int n = 1; n <= 17; n++) {
+            T = 2.0 * z * T1 - T0;
+            T0 = T1; T1 = T;
+            T = 2.0 * z * T1 - T0;
+            s = s + a1[n] * T;
+            T0 = T1; T1 = T;
+        };
+        result[i] = s;
+        i += blockDim.x * gridDim.x;
+    }
+}
+
+void J1_CUDA(const double* const x, double* result, const unsigned int size)
+{
+    double* dev_x = 0;
+    double* dev_res = 0;
+
+    cudaMalloc((void**)&dev_res, size * sizeof(double));
+    cudaMalloc((void**)&dev_x, size * sizeof(double));
+    cudaMemcpy(dev_x, x, size * sizeof(double), cudaMemcpyHostToDevice);
+
+    J1_OneThread << <(size + 127) / 128, 128 >> > (dev_x, dev_res, size);
 
     cudaGetLastError();
     cudaDeviceSynchronize();

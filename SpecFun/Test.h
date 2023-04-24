@@ -10,4 +10,6 @@ void TestY0();
 void TestY1();
 void TestBessel_CUDA();
 void TestJ0_CUDA();
+void TestJ1_CUDA();
+void TestY0_CUDA();
 void TestChebyshevPolynomials();

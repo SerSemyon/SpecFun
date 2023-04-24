@@ -15,23 +15,33 @@ void BesselWithCuda(const double v, const double* const x, double* result, const
 /// <summary>
 /// Вычисление функции Бесселя нулевого порядка на отрезке [-8;8] 
 /// </summary>
-/// <param name="x"> Значение параметра </param>
+/// <param name="x"> значения параметра </param>
+/// <param name="result"> полученные значения </param>
+/// <param name="size"> количество точек </param>
 void J0_CUDA(const double* const x, double* result, const unsigned int size);
 
 /// <summary>
 /// Вычисление функции Бесселя нулевого порядка на отрезке [-8;8] 
 /// </summary>
-/// <param name="x"> Значение параметра </param>
+/// <param name="x"> значения параметра </param>
+/// <param name="result"> полученные значения </param>
+/// <param name="size"> количество точек </param>
 void J1_CUDA(const double* const x, double* result, const unsigned int size);
 
 /// <summary>
 /// Вычисление функции Неймана нулевого порядка на (0;8]
 /// </summary>
-/// <param name="x"> Значение параметра </param>
+/// <param name="x"> значения параметра </param>
+/// <param name="result"> значения параметра </param>
+/// <param name="size"> количество точек </param>
+/// <param name="J0"> значения функции Бесселя нулевого порядка </param>
 void Y0_CUDA(const double* const x, double* result, const unsigned int size, const double* const J0);
 
 /// <summary>
 /// Вычисление функции Неймана нулевого порядка на (0;8]
 /// </summary>
-/// <param name="x"> Значение параметра </param>
-void Y1_CUDA(const double* const x, double* result, const unsigned int size, const double* const J0);
+/// <param name="x"> значения параметра </param>
+/// <param name="result"> значения параметра </param>
+/// <param name="size"> количество точек </param>
+/// <param name="J1"> значения функции Бесселя первого порядка </param>
+void Y1_CUDA(const double* const x, double* result, const unsigned int size, const double* const J1);

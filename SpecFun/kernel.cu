@@ -17,8 +17,10 @@ int main()
     //TestBesselNew();
     TestBessel_CUDA();
     TestJ0_CUDA();
+    TestJ1_CUDA();
     TestNeumannCPU();
     TestY0();
     TestY1();
+    TestY0_CUDA();
     TestChebyshevPolynomials();
 }
