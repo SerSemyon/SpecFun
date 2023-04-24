@@ -28,7 +28,7 @@ void TestBesselCPU()
     J(v, x, res2, n);
     for (int i = 0; i < n; i++)
     {
-        if (abs(res1[i] - res2[i]) > 1E-2)
+        if (abs(res1[i] - res2[i]) > epsilon)
         {
             std::cout << "WARNING!!!" << std::endl;
             std::cout << "TestBesselCPU failed!" << x[i] << " " << res1[i] << " " << res2[i] << std::endl << std::endl;

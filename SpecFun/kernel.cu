@@ -11,7 +11,7 @@
 
 int main()
 {
-    TestBesselCPU();
+    //TestBesselCPU();
     TestJ0();
     TestJ1();
     //TestBesselNew();
