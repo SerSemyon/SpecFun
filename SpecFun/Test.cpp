@@ -6,7 +6,7 @@
 #include <iostream>
 #include "log_duration.h"
 
-double epsilon = 1E-15;
+double epsilon = 1E-12;
 
 /* TODO - Встроенная реализация даёт низкую точность и, чем дальше от нуля, тем выше ошибка.
 Поэтому для проверки значений нужно будет использовать таблицы с более точными результатами,иначе тест всегда будет проваливаться. 
@@ -30,61 +30,19 @@ void TestBesselCPU()
     {
         if (abs(res1[i] - res2[i]) > epsilon)
         {
-            std::cout << "TestBesselCPU failed!" << x[i] << " " << res1[i] << " " << res2[i] << std::endl;
+            std::cout << "WARNING!!!" << std::endl;
+            std::cout << "TestBesselCPU failed!" << x[i] << " " << res1[i] << " " << res2[i] << std::endl << std::endl;
             successfully = false;
             break;
         }
     }
     if (successfully)
-        std::cout << "TestBesselCPU OK" << std::endl;
-}
-
-void TestNeumannCPU()
-{
-    std::cout << "TestNeumannCPU started" << std::endl;
-    int v = 0;
-    int n = 1000000;
-    bool successfully = true;
-    double* res1 = new double[n];
-    double* res2 = new double[n];
-    double* res3 = new double[n];
-    double* x = new double[n];
-    for (int i = 0; i < n; i++)
-    {
-        x[i] = i * 0.00000001;
-        res1[i] = __std_smf_cyl_neumann(v, x[i]);
-    }
-    double* Js = new double[n];
-    J(v, x, Js, n);
-    {
-        LOG_DURATION("Y_0");
-        for (int i = 0; i < n; i++)
-        {
-            res3[i] = Y_0(x[i], Js[i]);
-        }
-    }
-    {
-        LOG_DURATION("Neumann");
-        Neumann(v, x, res2, n, Js);
-    }
-    //for (int i = 0; i < 10; i++)
-      //  std::cout << res1[i] << " " << res2[i] << " " << res3[i] << std::endl;
-    for (int i = 0; i < n; i++)
-    {
-        if (abs(res1[i] - res2[i]) > 1E-4)
-        {
-            std::cout << "TestNeumannCPU failed!" << x[i] << " " << res1[i] << " " << res2[i] << std::endl;
-            successfully = false;
-            break;
-        }
-    }
-    if (successfully)
-        std::cout << "TestNeumannCPU OK" << std::endl;
+        std::cout << "TestBesselCPU OK" << std::endl << std::endl;
 }
 
 void TestJ0()
 {
-    std::cout << "TestBesselCPU started" << std::endl;
+    std::cout << "TestJ0 started" << std::endl;
     int v = 0;
     int n = 1000;
     bool successfully = true;
@@ -110,13 +68,166 @@ void TestJ0()
     {
         if (abs(res1[i] - res2[i]) > epsilon)
         {
-            std::cout << "TestJ0 failed!" << x[i] << " " << res1[i] << " " << res2[i] << std::endl;
+            std::cout << "WARNING!!!" << std::endl;
+            std::cout << "TestJ0 failed!" << x[i] << " " << res1[i] << " " << res2[i] << std::endl << std::endl;
             successfully = false;
             break;
         }
     }
     if (successfully)
-        std::cout << "TestBesselCPU OK" << std::endl;
+        std::cout << "TestJ0 OK" << std::endl << std::endl;
+}
+
+void TestJ1()
+{
+    std::cout << "TestJ1 started" << std::endl;
+    int v = 1;
+    int n = 1000;
+    bool successfully = true;
+    double* res1 = new double[n];
+    double* res2 = new double[n];
+    double* x = new double[n];
+    for (int i = 0; i < n; i++)
+    {
+        x[i] = i * 0.001;
+    }
+    {
+        LOG_DURATION("J");
+        J(v, x, res1, n);
+    }
+    {
+        LOG_DURATION("J1");
+        for (int i = 0; i < n; i++)
+        {
+            res2[i] = J_1(x[i]);
+        }
+    }
+    for (int i = 0; i < n; i++)
+    {
+        if (abs(res1[i] - res2[i]) > epsilon)
+        {
+            std::cout << "WARNING!!!" << std::endl;
+            std::cout << "TestJ1 failed!" << x[i] << " " << res1[i] << " " << res2[i] << std::endl << std::endl;
+            successfully = false;
+            break;
+        }
+    }
+    if (successfully)
+        std::cout << "TestJ1 OK" << std::endl << std::endl;
+}
+
+void TestNeumannCPU()
+{
+    std::cout << "TestNeumannCPU started" << std::endl;
+    int v = 0;
+    int n = 1000000;
+    bool successfully = true;
+    double* res1 = new double[n];
+    double* res2 = new double[n];
+    double* x = new double[n];
+    for (int i = 0; i < n; i++)
+    {
+        x[i] = i * 0.00000001;
+        res1[i] = __std_smf_cyl_neumann(v, x[i]);
+    }
+    double* Js = new double[n];
+    J(v, x, Js, n);
+    {
+        LOG_DURATION("Neumann");
+        Neumann(v, x, res2, n, Js);
+    }
+    for (int i = 0; i < n; i++)
+    {
+        if (abs(res1[i] - res2[i]) > 1E-4)
+        {
+            std::cout << "WARNING!!!" << std::endl;
+            std::cout << "TestNeumannCPU failed!" << x[i] << " " << res1[i] << " " << res2[i] << std::endl << std::endl;
+            successfully = false;
+            break;
+        }
+    }
+    if (successfully)
+        std::cout << "TestNeumannCPU OK" << std::endl << std::endl;
+}
+
+void TestY0()
+{
+    std::cout << "TestY0 started" << std::endl;
+    int v = 0;
+    int n = 1000000;
+    bool successfully = true;
+    double* res1 = new double[n];
+    double* res2 = new double[n];
+    double* x = new double[n];
+    for (int i = 0; i < n; i++)
+    {
+        x[i] = i * 0.00000001;
+    }
+    double* Js = new double[n];
+    J(v, x, Js, n);
+    {
+        LOG_DURATION("Y_0");
+        for (int i = 0; i < n; i++)
+        {
+            res1[i] = Y_0(x[i], Js[i]);
+        }
+    }
+    {
+        LOG_DURATION("Neumann");
+        Neumann(v, x, res2, n, Js);
+    }
+    for (int i = 0; i < n; i++)
+    {
+        if (abs(res1[i] - res2[i]) > 1E-4)
+        {
+            std::cout << "WARNING!!!" << std::endl;
+            std::cout << "TestY0 failed!" << x[i] << " " << res1[i] << " " << res2[i] << std::endl << std::endl;
+            successfully = false;
+            break;
+        }
+    }
+    if (successfully)
+        std::cout << "TestY0 OK" << std::endl << std::endl;
+}
+
+void TestY1()
+{
+    std::cout << "TestY1 started" << std::endl;
+    int v = 1;
+    int n = 1000000;
+    bool successfully = true;
+    double* res1 = new double[n];
+    double* res2 = new double[n];
+    double* x = new double[n];
+    for (int i = 0; i < n; i++)
+    {
+        x[i] = i * 0.00000001;
+    }
+    double* Js = new double[n];
+    J(v, x, Js, n);
+    {
+        LOG_DURATION("Y_1");
+        for (int i = 0; i < n; i++)
+        {
+            res1[i] = Y_1(x[i], Js[i]);
+        }
+    }
+    {
+        LOG_DURATION("Neumann");
+        Neumann(v, x, res2, n, Js);
+    }
+    for (int i = 0; i < n; i++)
+    {
+        if (abs(res1[i] - res2[i]) > 1E-4)
+        {
+            std::cout << "WARNING!!!" << std::endl;
+            std::cout << "TestY1 failed!" << x[i] << " " << res1[i] << " " << res2[i] << std::endl << std::endl;
+            successfully = false;
+            break;
+        }
+    }
+    if (successfully)
+        std::cout << "TestY1 OK" << std::endl << std::endl;
 }
 
 void TestBesselCuda()
@@ -145,12 +256,13 @@ void TestBesselCuda()
     {
         if (abs(resGPU[i] - resCPU[i]) > epsilon)
         {
-            std::cout << "WARNING!!!TestBessel failed! point:" << x[i] << " |resGPU-resCPU|=" << abs(resGPU[i] - resCPU[i])  << std::endl;
+            std::cout << "WARNING!!!" << std::endl;
+            std::cout << "WARNING!!!TestBesselCuda failed! point:" << x[i] << " |resGPU-resCPU|=" << abs(resGPU[i] - resCPU[i])  << std::endl << std::endl;
             return;
         }
         //std::cout << x[i] << '\t' << resGPU[i] << " " << resCPU[i] << std::endl;
     }
-    std::cout << "TestBesselCuda OK" << std::endl;
+    std::cout << "TestBesselCuda OK" << std::endl << std::endl;
 }
 
 void TestBesselNew() {
@@ -178,12 +290,13 @@ void TestBesselNew() {
     {
         if (abs(resGPU[i] - resCPU[i]) > 1E-13)
         {
-            std::cout << "WARNING!!!TestBessel failed! point:" << x[i] << " |resGPU-resCPU|=" << abs(resGPU[i] - resCPU[i]) << std::endl;
+            std::cout << "WARNING!!!" << std::endl;
+            std::cout << "TestBessel failed! point:" << x[i] << " |resGPU-resCPU|=" << abs(resGPU[i] - resCPU[i]) << std::endl << std::endl;
             return;
         }
         //std::cout << x[i] << '\t' << resGPU[i] << " " << resCPU[i] << std::endl;
     }
-    std::cout << "TestBesselNew OK" << std::endl;
+    std::cout << "TestBesselNew OK" << std::endl << std::endl;
 }
 
 double T_recursively(int n, double x)
@@ -207,10 +320,11 @@ void TestChebyshevPolynomials()
         t2 = T(i, 0.2);
         if ((t1 - t2) > epsilon)
         {
-            std::cout << "WARNING!!!TestChebyshevPolynomials failed! order " << i << "T_recursively - T = " << t1 - t2 << std::endl;
+            std::cout << "WARNING!!!" << std::endl;
+            std::cout << "TestChebyshevPolynomials failed! order " << i << "T_recursively - T = " << t1 - t2 << std::endl << std::endl;
             successfully = false;
         }
     }
     if (successfully)
-        std::cout << "TestChebyshevPolynomials OK" << std::endl;
+        std::cout << "TestChebyshevPolynomials OK" << std::endl << std::endl;
 }

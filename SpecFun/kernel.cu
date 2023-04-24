@@ -11,9 +11,13 @@
 
 int main()
 {
-    TestBesselNew();
-    TestNeumannCPU();
+    TestBesselCPU();
     TestJ0();
+    TestJ1();
+    TestBesselNew();
     TestBesselCuda();
+    TestNeumannCPU();
+    TestY0();
+    TestY1();
     TestChebyshevPolynomials();
 }
