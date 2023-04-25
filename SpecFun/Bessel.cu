@@ -6,6 +6,7 @@
 #include "CPUfunctions.h"
 #include "GPUfunctions.h"
 #include <iostream>
+#include "log_duration.h"
 
 /// <summary>
 /// Код одной нити GPU
@@ -49,11 +50,15 @@ void BesselWithCuda(const double v, const double* const x, double* result, const
     cudaMalloc((void**)&dev_x, size * sizeof(double));
     cudaMemcpy(dev_x, x, size * sizeof(double), cudaMemcpyHostToDevice);
 
-    double gamma = Gamma(v + 1);
-    BesselOneThread << <(size + 127) / 128, 128 >> > (v, dev_x, gamma, dev_res, size);
+    {
+        LOG_DURATION("GPU without data transfers");
+        double gamma = Gamma(v + 1);
+        BesselOneThread << <(size + 127) / 128, 128 >> > (v, dev_x, gamma, dev_res, size);
 
-    cudaGetLastError();
-    cudaDeviceSynchronize();
+        cudaGetLastError();
+        cudaDeviceSynchronize();
+    }
+
     cudaMemcpy(result, dev_res, size * sizeof(double), cudaMemcpyDeviceToHost);
 
     cudaFree(dev_res);
@@ -204,10 +209,14 @@ void J0_CUDA(const double* const x, double* result, const unsigned int size)
     cudaMalloc((void**)&dev_x, size * sizeof(double));
     cudaMemcpy(dev_x, x, size * sizeof(double), cudaMemcpyHostToDevice);
 
-    J0_OneThread << <(size + 127) / 128, 128 >> > (dev_x, dev_res, size);
+    {
+        LOG_DURATION("GPU without data transfers");
+        J0_OneThread << <(size + 127) / 128, 128 >> > (dev_x, dev_res, size);
 
-    cudaGetLastError();
-    cudaDeviceSynchronize();
+        cudaGetLastError();
+        cudaDeviceSynchronize();
+    }
+
     cudaMemcpy(result, dev_res, size * sizeof(double), cudaMemcpyDeviceToHost);
 
     cudaFree(dev_res);
@@ -273,10 +282,13 @@ void J1_CUDA(const double* const x, double* result, const unsigned int size)
     cudaMalloc((void**)&dev_x, size * sizeof(double));
     cudaMemcpy(dev_x, x, size * sizeof(double), cudaMemcpyHostToDevice);
 
-    J1_OneThread << <(size + 127) / 128, 128 >> > (dev_x, dev_res, size);
+    {
+        LOG_DURATION("GPU without data transfers");
+        J1_OneThread << <(size + 127) / 128, 128 >> > (dev_x, dev_res, size);
 
-    cudaGetLastError();
-    cudaDeviceSynchronize();
+        cudaGetLastError();
+        cudaDeviceSynchronize();
+    }
     cudaMemcpy(result, dev_res, size * sizeof(double), cudaMemcpyDeviceToHost);
 
     cudaFree(dev_res);

@@ -85,3 +85,21 @@ double Y_0(double x, double J0);
 /// <param name="x"> Значение параметра </param>
 /// <param name="J1"> значения функции Бесселя первого порядка </param>
 double Y_1(double x, double J1);
+
+/// <summary>
+/// Мой вариант вычисления функции Бесселя для упорядоченного по возрастанию набора точек
+/// </summary>
+/// <param name="x"> Значение параметра </param>
+/// <param name="v"> Порядок функции </param>
+/// <param name="res"> Указатель на результат </param>
+/// <param name="n"> Количество точек </param>
+void BesselOrderedSet(double* x, double v, double* res, int n);
+
+/// <summary>
+/// Мой вариант вычисления функции Бесселя
+/// </summary>
+/// <param name="x"> Значение параметра </param>
+/// <param name="v"> Порядок функции </param>
+/// <param name="res"> Указатель на результат </param>
+/// <param name="n"> Количество точек </param>
+void Jnew(double* x, double v, double* res, int n);

@@ -7,6 +7,15 @@
 #include "log_duration.h"
 
 double epsilon = 1E-12;
+int nJ0 = 1000000;
+int nJ1 = 1000000;
+int nJ = 1000000;
+double b0 = 7;
+double b1 = 7;
+double bJ = 7;
+double h0 = b0 / nJ0;
+double h1 = b1 / nJ1;
+double hJ = bJ / nJ;
 
 /* TODO - Встроенная реализация даёт низкую точность и, чем дальше от нуля, тем выше ошибка.
 Поэтому для проверки значений нужно будет использовать таблицы с более точными результатами,иначе тест всегда будет проваливаться. 
@@ -36,6 +45,9 @@ void TestBesselCPU()
             break;
         }
     }
+    delete[] x;
+    delete[] res1;
+    delete[] res2;
     if (successfully)
         std::cout << "TestBesselCPU OK" << std::endl << std::endl;
 }
@@ -44,27 +56,26 @@ void TestJ0()
 {
     std::cout << "TestJ0 started" << std::endl;
     int v = 0;
-    int n = 1000000;
     bool successfully = true;
-    double* res1 = new double[n];
-    double* res2 = new double[n];
-    double* x = new double[n];
-    for (int i = 0; i < n; i++)
+    double* res1 = new double[nJ0];
+    double* res2 = new double[nJ0];
+    double* x = new double[nJ0];
+    for (int i = 0; i < nJ0; i++)
     {
-        x[i] = i * 0.00000001;
+        x[i] = i * h0;
     }
     {
         LOG_DURATION("J");
-        J(v, x, res1, n);
+        J(v, x, res1, nJ0);
     }
     {
         LOG_DURATION("J0");
-        for (int i = 0; i < n; i++)
+        for (int i = 0; i < nJ0; i++)
         {
             res2[i] = J_0(x[i]);
         }
     }
-    for (int i = 0; i < n; i++)
+    for (int i = 0; i < nJ0; i++)
     {
         if (abs(res1[i] - res2[i]) > epsilon)
         {
@@ -74,6 +85,9 @@ void TestJ0()
             break;
         }
     }
+    delete[] x;
+    delete[] res1;
+    delete[] res2;
     if (successfully)
         std::cout << "TestJ0 OK" << std::endl << std::endl;
 }
@@ -82,27 +96,26 @@ void TestJ1()
 {
     std::cout << "TestJ1 started" << std::endl;
     int v = 1;
-    int n = 1000000;
     bool successfully = true;
-    double* res1 = new double[n];
-    double* res2 = new double[n];
-    double* x = new double[n];
-    for (int i = 0; i < n; i++)
+    double* res1 = new double[nJ1];
+    double* res2 = new double[nJ1];
+    double* x = new double[nJ1];
+    for (int i = 0; i < nJ1; i++)
     {
-        x[i] = i * 0.00000001;
+        x[i] = i * h1;
     }
     {
         LOG_DURATION("J");
-        J(v, x, res1, n);
+        J(v, x, res1, nJ1);
     }
     {
         LOG_DURATION("J1");
-        for (int i = 0; i < n; i++)
+        for (int i = 0; i < nJ1; i++)
         {
             res2[i] = J_1(x[i]);
         }
     }
-    for (int i = 0; i < n; i++)
+    for (int i = 0; i < nJ1; i++)
     {
         if (abs(res1[i] - res2[i]) > epsilon)
         {
@@ -112,6 +125,9 @@ void TestJ1()
             break;
         }
     }
+    delete[] x;
+    delete[] res1;
+    delete[] res2;
     if (successfully)
         std::cout << "TestJ1 OK" << std::endl << std::endl;
 }
@@ -146,6 +162,9 @@ void TestNeumannCPU()
             break;
         }
     }
+    delete[] x;
+    delete[] res1;
+    delete[] res2;
     if (successfully)
         std::cout << "TestNeumannCPU OK" << std::endl << std::endl;
 }
@@ -186,6 +205,9 @@ void TestY0()
             break;
         }
     }
+    delete[] x;
+    delete[] res1;
+    delete[] res2;
     if (successfully)
         std::cout << "TestY0 OK" << std::endl << std::endl;
 }
@@ -226,6 +248,9 @@ void TestY1()
             break;
         }
     }
+    delete[] x;
+    delete[] res1;
+    delete[] res2;
     if (successfully)
         std::cout << "TestY1 OK" << std::endl << std::endl;
 }
@@ -234,105 +259,118 @@ void TestBessel_CUDA()
 {
     std::cout << "TestBesselCuda started" << std::endl;
     int v = 1;
-    int n = 1500000;
-    double* x = new double[n];
-    double* resGPU = new double[n];
-    double* resCPU = new double[n];
-    for (int i = 0; i < n; i++)
+    bool successfully = true;
+    double h = bJ / nJ;
+    double* x = new double[nJ];
+    double* resGPU = new double[nJ];
+    double* resCPU = new double[nJ];
+    for (int i = 0; i < nJ; i++)
     {
-        x[i] = 0.0001 * i;
+        x[i] = h * i;
     }
 
     {
         LOG_DURATION("CPU clock");
-        J(v, x, resCPU, n);
+        J(v, x, resCPU, nJ);
     }
 
     {
         LOG_DURATION("GPU clock");
-        BesselWithCuda(v, x, resGPU, n);
+        BesselWithCuda(v, x, resGPU, nJ);
     }
 
-    for (int i = 0; i < n; i++)
+    for (int i = 0; i < nJ; i++)
     {
         if (abs(resGPU[i] - resCPU[i]) > epsilon)
         {
             std::cout << "WARNING!!!" << std::endl;
             std::cout << "TestBesselCuda failed! point:" << x[i] << " |resGPU-resCPU|=" << abs(resGPU[i] - resCPU[i])  << std::endl << std::endl;
-            return;
+            break;
         }
     }
-    std::cout << "TestBesselCuda OK" << std::endl << std::endl;
+    delete[] x;
+    delete[] resGPU;
+    delete[] resCPU;
+    if (successfully)
+        std::cout << "TestBesselCuda OK" << std::endl << std::endl;
 }
 
 void TestJ0_CUDA()
 {
     std::cout << "TestJ0_CUDA started" << std::endl;
     int v = 0;
-    int n = 1000000;
-    double* x = new double[n];
-    double* res1 = new double[n];
-    double* res2 = new double[n];
-    for (int i = 0; i < n; i++)
+    bool successfully = true;
+    double* x = new double[nJ0];
+    double* res1 = new double[nJ0];
+    double* res2 = new double[nJ0];
+    for (int i = 0; i < nJ0; i++)
     {
-        x[i] = i * 0.00000001;
+        x[i] = i * h0;
     }
 
     {
         LOG_DURATION("Bessel");
-        BesselWithCuda(v, x, res1, n);
+        BesselWithCuda(v, x, res1, nJ0);
     }
 
     {
         LOG_DURATION("J0");
-        J0_CUDA(x, res2, n);
+        J0_CUDA(x, res2, nJ0);
     }
 
-    for (int i = 0; i < n; i++)
+    for (int i = 0; i < nJ0; i++)
     {
         if (abs(res1[i] - res2[i]) > epsilon)
         {
             std::cout << "WARNING!!!" << std::endl;
             std::cout << "TestJ0_CUDA failed! point:" << x[i] << " |res1-resCPU|=" << abs(res1[i] - res2[i]) << std::endl << std::endl;
-            return;
+            break;
         }
     }
-    std::cout << "TestJ0_CUDA OK" << std::endl << std::endl;
+    delete[] x;
+    delete[] res1;
+    delete[] res2;
+    if (successfully)
+        std::cout << "TestJ0_CUDA OK" << std::endl << std::endl;
 }
 
 void TestJ1_CUDA()
 {
     std::cout << "TestJ1_CUDA started" << std::endl;
     int v = 1;
-    int n = 1000000;
-    double* x = new double[n];
-    double* res1 = new double[n];
-    double* res2 = new double[n];
-    for (int i = 0; i < n; i++)
+    bool successfully = true;
+    double* x = new double[nJ1];
+    double* res1 = new double[nJ1];
+    double* res2 = new double[nJ1];
+    for (int i = 0; i < nJ1; i++)
     {
-        x[i] = i * 0.00000001;
+        x[i] = i * h1;
     }
 
     {
         LOG_DURATION("Bessel");
-        BesselWithCuda(v, x, res1, n);
+        BesselWithCuda(v, x, res1, nJ1);
     }
 
     {
         LOG_DURATION("J1");
-        J1_CUDA(x, res2, n);
+        J1_CUDA(x, res2, nJ1);
     }
 
-    for (int i = 0; i < n; i++)
+    for (int i = 0; i < nJ1; i++)
     {
         if (abs(res1[i] - res2[i]) > epsilon)
         {
             std::cout << "WARNING!!!" << std::endl;
             std::cout << "TestJ1_CUDA failed! point:" << x[i] << " |res1-resCPU|=" << abs(res1[i] - res2[i]) << std::endl << std::endl;
-            return;
+            break;
         }
     }
-    std::cout << "TestJ1_CUDA OK" << std::endl << std::endl;
+    delete[] x;
+    delete[] res1;
+    delete[] res2;
+    if (successfully)
+        std::cout << "TestJ1_CUDA OK" << std::endl << std::endl;
 }
 
 void TestY0_CUDA()
@@ -368,6 +406,9 @@ void TestY0_CUDA()
             break;
         }
     }
+    delete[] x;
+    delete[] res1;
+    delete[] res2;
     if (successfully)
         std::cout << "TestY0_CUDA OK" << std::endl << std::endl;
 }
@@ -434,4 +475,82 @@ void TestChebyshevPolynomials()
     }
     if (successfully)
         std::cout << "TestChebyshevPolynomials OK" << std::endl << std::endl;
+}
+
+void TestJnew()
+{
+    std::cout << "TestJnew started" << std::endl;
+    int v = 1;
+    bool successfully = true;
+    double* x = new double[nJ];
+    double* res1 = new double[nJ];
+    double* res2 = new double[nJ];
+    for (int i = 0; i < nJ; i++)
+    {
+        x[i] = hJ * i;
+    }
+
+    {
+        LOG_DURATION("J");
+        J(v, x, res1, nJ);
+    }
+
+    {
+        LOG_DURATION("Jnew");
+        Jnew(x, v, res2, nJ);
+    }
+
+    for (int i = 0; i < nJ; i++)
+    {
+        if (abs(res1[i] - res2[i]) > epsilon)
+        {
+            std::cout << "WARNING!!!" << std::endl;
+            std::cout << "TestJnew failed! point:" << x[i] << " |res1-res2|=" << abs(res1[i] - res2[i]) << std::endl << std::endl;
+            break;
+        }
+    }
+    delete[] x;
+    delete[] res1;
+    delete[] res2;
+    if (successfully)
+        std::cout << "TestJnew OK" << std::endl << std::endl;
+}
+
+void TestBesselOrderedSet()
+{
+    std::cout << "TestBesselOrderedSet started" << std::endl;
+    int v = 1;
+    bool successfully = true;
+    double* x = new double[nJ];
+    double* res1 = new double[nJ];
+    double* res2 = new double[nJ];
+    for (int i = 0; i < nJ; i++)
+    {
+        x[i] = hJ * i;
+    }
+
+    {
+        LOG_DURATION("J");
+        J(v, x, res1, nJ);
+    }
+
+    {
+        LOG_DURATION("BesselOrderedSet");
+        BesselOrderedSet(x, v, res2, nJ);
+    }
+
+    for (int i = 0; i < nJ; i++)
+    {
+        if (abs(res2[i] - res1[i]) > epsilon)
+        {
+            std::cout << "WARNING!!!" << std::endl;
+            std::cout << "TestBesselOrderedSet failed! point:" << x[i] << " |res1-res2|=" << abs(res2[i] - res1[i]) << std::endl << std::endl;
+            break;
+        }
+    }
+    delete[] x;
+    delete[] res2;
+    delete[] res1;
+    if (successfully)
+        std::cout << "TestBesselOrderedSet OK" << std::endl << std::endl;
 }

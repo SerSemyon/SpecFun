@@ -10,6 +10,7 @@ double cyl_next_order(double x, double v, double value_v, double value_v_minus_1
 const double eps = 1E-12;
 
 void J(const double v, const double* x, double* result, const unsigned int size) {
+	int max_iterations = 100;
     double aNext;
     double diff;
     for (int i = 0; i < size; i++) {
@@ -51,13 +52,13 @@ const double a0[18] =
 
 double J_0(double x) {
 	double z = x / 8.0; z = 2.0 * z * z - 1.0;
-	double s = 0.0, T0 = 1.0, T1 = z;
+	double T_previous = 1.0, T_current = z;
 	double T;
-	s = s + a0[0] * T0 + a0[1] * T1;
+	double s = a0[0] * T_previous + a0[1] * T_current;
 	for (int n = 2; n <= 17; n++) {
-		T = 2.0 * z * T1 - T0;
-		s = s + a0[n] * T;
-		T0 = T1; T1 = T;
+		T = 2.0 * z * T_current - T_previous;
+		s += a0[n] * T;
+		T_previous = T_current; T_current = T;
 	};
 	return s;
 };
@@ -86,15 +87,97 @@ const double a1[18] =
 
 double J_1(double x) {
 	double z = x / 8.0;
-	double s = 0.0, T0 = 1.0, T1 = z;
+	double T_previous = 1.0, T_current = z;
 	double T;
-	s = s + a1[0] * T1;
+	double s = a1[0] * T_current;
 	for (int n = 1; n <= 17; n++) {
-		T = 2.0 * z * T1 - T0;
-		T0 = T1; T1 = T;
-		T = 2.0 * z * T1 - T0;
-		s = s + a1[n] * T;
-		T0 = T1; T1 = T;
+		T = 2.0 * z * T_current - T_previous;
+		T_previous = T_current; T_current = T;
+		T = 2.0 * z * T_current - T_previous;
+		s += a1[n] * T;
+		T_previous = T_current; T_current = T;
 	};
 	return s;
 };
+
+void Jnew(double* x, double v, double* res, int n) {
+	double eps = 1E-12;
+	double aNext;
+	double diff;
+	int max_iterations = 100;
+	bool* converged = new bool[n];
+	int notConverged = n;
+	double* aPrev = new double[n];
+	double a_0 = 1 / Gamma(v + 1);
+	for (int i = 0; i < n; i++)
+	{
+		aPrev[i] = a_0;
+		converged[i] = false;
+		res[i] = a_0;
+	}
+	double p_k;
+	for (int k = 0; k < max_iterations; k++)
+	{
+		if (notConverged == 0)
+			break;
+		p_k = -1 / (4 * (v + k + 1) * (k + 1));
+		for (int i = 0; i < n; i++)
+		{
+			if (!converged[i])
+			{
+				aNext = p_k * aPrev[i] * x[i] * x[i];
+				res[i] += aNext;
+				diff = abs(aPrev[i] - aNext);
+				aPrev[i] = aNext;
+				if (diff < eps)
+				{
+					converged[i] = true;
+					notConverged--;
+				}
+			}
+		}
+	}
+	for (int i = 0; i < n; i++)
+	{
+		res[i] *= pow(x[i] * 0.5, v);
+	}
+	delete[] converged;
+	delete[] aPrev;
+}
+
+void BesselOrderedSet(double* x, double v, double* res, int n) {
+	double aNext;
+	double diff;
+	int max_iterations = 100;
+	int ind_begin_set = 0;
+	double* aPrev = new double[n];
+	double a_0 = 1 / Gamma(v + 1);
+	for (int i = 0; i < n; i++)
+	{
+		aPrev[i] = a_0;
+		res[i] = a_0;
+	}
+	double p_k;
+	for (int k = 0; k < max_iterations; k++)
+	{
+		if (ind_begin_set > n - 2)
+			break;
+		p_k = -1 / (4 * (v + k + 1) * (k + 1));
+		for (int i = ind_begin_set; i < n; i++)
+		{
+			aNext = p_k * aPrev[i] * x[i] * x[i];
+			res[i] += aNext;
+			diff = abs(aPrev[i] - aNext);
+			aPrev[i] = aNext;
+			if (diff < eps)
+			{
+				ind_begin_set++;
+			}
+		}
+	}
+	for (int i = 0; i < n; i++)
+	{
+		res[i] *= pow(x[i] * 0.5, v);
+	}
+	delete[] aPrev;
+}

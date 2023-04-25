@@ -11,13 +11,14 @@
 
 int main()
 {
-    //TestBesselCPU();
-    TestJ0();
-    TestJ1();
-    //TestBesselNew();
     TestBessel_CUDA();
+    TestJnew();
+    TestBesselOrderedSet();
+    TestJ0();
     TestJ0_CUDA();
+    TestJ1();
     TestJ1_CUDA();
+    //TestBesselNew();
     TestNeumannCPU();
     TestY0();
     TestY1();
