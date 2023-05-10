@@ -91,6 +91,7 @@
     <ClCompile Include="ChebyshevPolynomials.cpp" />
     <ClCompile Include="GammaFunction.cpp" />
     <ClCompile Include="Neumann.cpp" />
+    <ClCompile Include="OtherFunctions.cpp" />
     <ClCompile Include="Test.cpp" />
   </ItemGroup>
   <ItemGroup>

@@ -100,7 +100,7 @@ double J_1(double x) {
 	return s;
 };
 
-void Jnew(double* x, double v, double* res, int n) {
+void Jnew(double v, double* x, double* res, int n) {
 	double eps = 1E-12;
 	double aNext;
 	double diff;
@@ -145,7 +145,7 @@ void Jnew(double* x, double v, double* res, int n) {
 	delete[] aPrev;
 }
 
-void BesselOrderedSet(double* x, double v, double* res, int n) {
+void BesselOrderedSet(double v, double* x, double* res, int n) {
 	double aNext;
 	double diff;
 	int max_iterations = 100;

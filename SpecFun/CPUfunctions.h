@@ -107,17 +107,36 @@ void Y_1(double* x, double* res, int n, double* J1);
 /// <summary>
 /// Мой вариант вычисления функции Бесселя для упорядоченного по возрастанию набора точек
 /// </summary>
-/// <param name="x"> Значение параметра </param>
 /// <param name="v"> Порядок функции </param>
+/// <param name="x"> Значение параметра </param>
 /// <param name="res"> Указатель на результат </param>
 /// <param name="n"> Количество точек </param>
-void BesselOrderedSet(double* x, double v, double* res, int n);
+void BesselOrderedSet(double v, double* x, double* res, int n);
 
 /// <summary>
 /// Мой вариант вычисления функции Бесселя
 /// </summary>
-/// <param name="x"> Значение параметра </param>
 /// <param name="v"> Порядок функции </param>
+/// <param name="x"> Значение параметра </param>
 /// <param name="res"> Указатель на результат </param>
 /// <param name="n"> Количество точек </param>
-void Jnew(double* x, double v, double* res, int n);
+void Jnew(double v, double* x, double* res, int n);
+
+/// <summary>
+/// Вычисляет значения любой цилиндрической фукнции порядка v+1 используя значения известные значения порядка v, v-1.
+/// </summary>
+/// <param name="v"> Порядок функции </param>
+/// <param name="x"> Значение параметра </param>
+/// <param name="Z_v"> Значение фукнции порядка v </param>
+/// <param name="Z_vPrev"> Значение функции порядка v-1</param>
+/// <returns></returns>
+double Z_vNext(double v, double x, double Z_v, double Z_vPrev);
+
+/// <summary>
+/// Вычисление производной любой цилиндрической функции через известные значения функции порядка v-1 и v+1.
+/// </summary>
+/// <param name="v"> Порядок функции </param>
+/// <param name="Z_vPrev"> Значение функции прядка v-1 </param>
+/// <param name="Z_vNext"> Значение функции прядка v+1 </param>
+/// <returns></returns>
+double dZ(double v, double Z_vPrev, double Z_vNext);

@@ -12,17 +12,18 @@
 int main()
 {
     TestBessel_CUDA();
-//    TestJnew();
-//    TestBesselOrderedSet();
-//    TestJ0();
-//    TestJ0_CUDA();
-//    TestJ1();
-//    TestJ1_CUDA();
-//    //TestBesselNew();
+    TestJnew();
+    TestBesselOrderedSet();
+    TestJ0();
+    TestJ0_CUDA();
+    TestJ1();
+    TestJ1_CUDA();
+    //TestBesselNew();
     TestNeumannCPU();
-//    TestY0();
+    TestY0();
     TestY1();
-//    TestY0_CUDA();
+    TestY0_CUDA();
     TestY1_CUDA();
-//    TestChebyshevPolynomials();
+    TestZ_vNext();
+    TestChebyshevPolynomials();
 }

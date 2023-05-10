@@ -11,10 +11,10 @@
 /// <summary>
 /// Код одной нити GPU
 /// </summary>
-/// <param name="x"> значения параметра </param>
-/// <param name="v"> порядок функции </param>
-/// <param name="gamma"> значение гамма функции от (v+1) </param>
-/// <param name="result"> полученные значения </param>
+/// <param name="x"> Значения параметра </param>
+/// <param name="result"> Указатель на результат </param>
+/// <param name="size"> Количество точек </param>
+/// <param name="J0"> Значения функции Бесселя нулевого порядка </param>
 __global__ void Y0_OneThread(const double* const x, double* result, int size, const double* const J0)
 {
     const double C = 0.5772156;
@@ -87,10 +87,10 @@ void Y0_CUDA(const double* const x, double* result, const unsigned int size, con
 /// <summary>
 /// Код одной нити GPU
 /// </summary>
-/// <param name="x"> значения параметра </param>
-/// <param name="v"> порядок функции </param>
-/// <param name="gamma"> значение гамма функции от (v+1) </param>
-/// <param name="result"> полученные значения </param>
+/// <param name="x"> Значения параметра </param>
+/// <param name="result"> Указатель на результат </param>
+/// <param name="size"> Количество точек </param>
+/// <param name="J1"> Значения функции Бесселя первого порядка </param>
 __global__ void Y1_OneThread(const double* const x, double* result, int size, const double* const J1)
 {
     const double C = 0.5772156;

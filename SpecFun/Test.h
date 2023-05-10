@@ -16,3 +16,4 @@ void TestY1_CUDA();
 void TestChebyshevPolynomials();
 void TestJnew();
 void TestBesselOrderedSet();
+void TestZ_vNext();
