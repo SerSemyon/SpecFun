@@ -80,11 +80,29 @@ void Neumann(double v, double* x, double* res, int n, double* Jpositive, double*
 double Y_0(double x, double J0);
 
 /// <summary>
-/// Вычисление функции Неймана нулевого порядка на (0;8]
+/// Вычисление функции Неймана первого порядка на (0;8]
 /// </summary>
 /// <param name="x"> Значение параметра </param>
-/// <param name="J1"> значения функции Бесселя первого порядка </param>
+/// <param name="J1"> Значение функции Бесселя первого порядка </param>
 double Y_1(double x, double J1);
+
+/// <summary>
+/// Вычисление функции Неймана нулевого порядка на (0;8]
+/// </summary>
+/// <param name="x"> Значения параметра </param>
+/// <param name="res"> Результат вычислений </param>
+/// <param name="n"> Количество точек </param>
+/// <param name="J0"> Значения функции Бесселя нулевого порядка </param>
+void Y_0(double* x, double* res, int n, double* J0);
+
+/// <summary>
+/// Вычисление функции Неймана первого порядка на (0;8]
+/// </summary>
+/// <param name="x"> Значения параметра </param>
+/// <param name="res"> Результат вычислений </param>
+/// <param name="n"> Количество точек </param>
+/// <param name="J1"> Значения функции Бесселя первого порядка </param>
+void Y_1(double* x, double* res, int n, double* J1);
 
 /// <summary>
 /// Мой вариант вычисления функции Бесселя для упорядоченного по возрастанию набора точек

@@ -177,6 +177,7 @@ void TestY0()
     bool successfully = true;
     double* res1 = new double[n];
     double* res2 = new double[n];
+    double* res3 = new double[n];
     double* x = new double[n];
     for (int i = 0; i < n; i++)
     {
@@ -195,6 +196,10 @@ void TestY0()
         LOG_DURATION("Neumann");
         Neumann(v, x, res2, n, Js);
     }
+    {
+        LOG_DURATION("Y_0");
+        Y_0(x, res3, n, Js);
+    }
     for (int i = 0; i < n; i++)
     {
         if (abs(res1[i] - res2[i]) > 1E-4)
@@ -204,10 +209,18 @@ void TestY0()
             successfully = false;
             break;
         }
+        if (abs(res1[i] - res3[i]) > 1E-4)
+        {
+            std::cout << "WARNING!!!" << std::endl;
+            std::cout << "TestY0 failed!" << x[i] << " " << res1[i] << " " << res3[i] << std::endl << std::endl;
+            successfully = false;
+            break;
+        }
     }
     delete[] x;
     delete[] res1;
     delete[] res2;
+    delete[] res3;
     if (successfully)
         std::cout << "TestY0 OK" << std::endl << std::endl;
 }
@@ -220,6 +233,7 @@ void TestY1()
     bool successfully = true;
     double* res1 = new double[n];
     double* res2 = new double[n];
+    double* res3 = new double[n];
     double* x = new double[n];
     for (int i = 0; i < n; i++)
     {
@@ -238,6 +252,10 @@ void TestY1()
         LOG_DURATION("Neumann");
         Neumann(v, x, res2, n, Js);
     }
+    {
+        LOG_DURATION("Y_1");
+        Y_1(x, res3, n, Js);
+    }
     for (int i = 0; i < n; i++)
     {
         if (abs(res1[i] - res2[i]) > 1E-4)
@@ -247,10 +265,18 @@ void TestY1()
             successfully = false;
             break;
         }
+        if (abs(res1[i] - res3[i]) > 1E-4)
+        {
+            std::cout << "WARNING!!!" << std::endl;
+            std::cout << "TestY1 failed!" << x[i] << " " << res1[i] << " " << res3[i] << std::endl << std::endl;
+            successfully = false;
+            break;
+        }
     }
     delete[] x;
     delete[] res1;
     delete[] res2;
+    delete[] res3;
     if (successfully)
         std::cout << "TestY1 OK" << std::endl << std::endl;
 }
@@ -377,23 +403,24 @@ void TestY0_CUDA()
 {
     std::cout << "TestY0_CUDA started" << std::endl;
     int v = 0;
-    int n = 128;
+    int n = 1000000;
     bool successfully = true;
     double* res1 = new double[n];
     double* res2 = new double[n];
     double* x = new double[n];
     for (int i = 0; i < n; i++)
     {
-        x[i] = (i+1) * 0.1;
+        x[i] = (i+1) * 0.00000001;
     }
     double* Js = new double[n];
     J(v, x, Js, n);
     {
-        LOG_DURATION("Neumann");
-        Neumann(v, x, res1, n, Js);
+        LOG_DURATION("CPU");
+        Y_0(x, res1, n, Js);
+        //Neumann(v, x, res1, n, Js);
     }
     {
-        LOG_DURATION("Y0");
+        LOG_DURATION("GPU");
         Y0_CUDA(x, res2, n, Js);
     }
     for (int i = 0; i < n; i++)

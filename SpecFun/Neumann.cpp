@@ -101,7 +101,8 @@ const double b0[] = {
 		0.00000'00000'00000'00038
 };
 
-double Y_0(double x, double J0) {
+double Y_0(double x, double J0) 
+{
 	double T2 = x / 8.0;
 	T2 = 2.0 * T2 * T2 - 1.0;
 	double T_previous = 1.0; double T_current = T2;
@@ -137,7 +138,8 @@ const double b1[] = {
 	0.00000'00000'00000'00004
 };
 
-double Y_1(double x, double J1) {
+double Y_1(double x, double J1) 
+{
 	double z = x / 8.0;
 	double T_previous = 1.0, T_current = z;
 	double T;
@@ -152,3 +154,43 @@ double Y_1(double x, double J1) {
 	s += (C + log(x / 2.0)) * J1 * 2.0 / M_PI - 2.0 / (M_PI * x);
 	return s;
 };
+
+
+void Y_0(double* x, double* res, int n, double* J0)
+{
+	for (int i = 0; i < n; i++)
+	{
+		double T2 = x[i] / 8.0;
+		T2 = 2.0 * T2 * T2 - 1.0;
+		double T_previous = 1.0; double T_current = T2;
+		double T;
+		double sum = b0[0] * T_previous + b0[1] * T_current;
+		for (int n = 2; n <= 17; n++) {
+			T = 2.0 * T2 * T_current - T_previous;
+			sum += b0[n] * T;
+			T_previous = T_current; T_current = T;
+		};
+		sum += (log(x[i] / 2.0) + C) * J0[i] * 2.0 / M_PI;
+		res[i] = sum;
+	}
+}
+
+void Y_1(double* x, double* res, int n, double* J1) 
+{
+	for (int i = 0; i < n; i++)
+	{
+		double z = x[i] / 8.0;
+		double T_previous = 1.0, T_current = z;
+		double T;
+		double s = b1[0] * T_current;
+		for (int n = 1; n <= 17; n++) {
+			T = 2.0 * z * T_current - T_previous;
+			T_previous = T_current; T_current = T;
+			T = 2.0 * z * T_current - T_previous;
+			s += b1[n] * T;
+			T_previous = T_current; T_current = T;
+		};
+		s += (C + log(x[i] / 2.0)) * J1[i] * 2.0 / M_PI - 2.0 / (M_PI * x[i]);
+		res[i] = s;
+	}
+}
