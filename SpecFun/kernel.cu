@@ -20,8 +20,9 @@ int main()
 //    TestJ1_CUDA();
 //    //TestBesselNew();
     TestNeumannCPU();
-    TestY0();
+//    TestY0();
     TestY1();
-    TestY0_CUDA();
-    TestChebyshevPolynomials();
+//    TestY0_CUDA();
+    TestY1_CUDA();
+//    TestChebyshevPolynomials();
 }

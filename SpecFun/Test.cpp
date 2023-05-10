@@ -440,6 +440,47 @@ void TestY0_CUDA()
         std::cout << "TestY0_CUDA OK" << std::endl << std::endl;
 }
 
+void TestY1_CUDA()
+{
+    std::cout << "TestY1_CUDA started" << std::endl;
+    int v = 1;
+    int n = 1000000;
+    bool successfully = true;
+    double* res1 = new double[n];
+    double* res2 = new double[n];
+    double* x = new double[n];
+    for (int i = 0; i < n; i++)
+    {
+        x[i] = (i + 1) * 0.00000001;
+    }
+    double* Js = new double[n];
+    J(v, x, Js, n);
+    {
+        LOG_DURATION("CPU");
+        Y_1(x, res1, n, Js);
+        //Neumann(v, x, res1, n, Js);
+    }
+    {
+        LOG_DURATION("GPU");
+        Y1_CUDA(x, res2, n, Js);
+    }
+    for (int i = 0; i < n; i++)
+    {
+        if (abs(res1[i] - res2[i]) > 1E-4)
+        {
+            std::cout << "WARNING!!!" << std::endl;
+            std::cout << "TestY1_CUDA failed!" << x[i] << " " << res1[i] << " " << res2[i] << std::endl << std::endl;
+            successfully = false;
+            break;
+        }
+    }
+    delete[] x;
+    delete[] res1;
+    delete[] res2;
+    if (successfully)
+        std::cout << "TestY1_CUDA OK" << std::endl << std::endl;
+}
+
 //void TestBesselNew() {
 //    std::cout << "TestBesselNew started" << std::endl;
 //    int n = 256;
