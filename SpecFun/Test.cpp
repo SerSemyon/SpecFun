@@ -660,7 +660,7 @@ void TestZ_vNext()
         LOG_DURATION("Z_2");
         for (int i = 0; i < n; i++)
         {
-            resZ[i] = Z_vNext(v, x[i], res1[i], res2[i]);
+            resZ[i] = Z_vNext(v, x[i], res0[i], res1[i]);
         }
     }
     for (int i = 0; i < n; i++)
@@ -668,7 +668,7 @@ void TestZ_vNext()
         if (abs(resZ[i] - res2[i]) > 1)
         {
             std::cout << "WARNING!!!" << std::endl;
-            std::cout << "TestZ_vNext failed!" << x[i] << " " << resZ[i] << " " << res2[i] << std::endl << std::endl;
+            std::cout << "TestZ_vNext failed! " << x[i] << " " << resZ[i] << " " << res2[i] << std::endl << std::endl;
             successfully = false;
             break;
         }
