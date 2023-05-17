@@ -28,6 +28,10 @@ void J(const double v, const double* x, double* result, const unsigned int size)
     }
 }
 
+double J_asymptotic (const double v, const double x) {
+	return pow(x / 2, v) / Gamma(v + 1) * exp(-x * x / (4 * (v + 1)));
+}
+
 const double a0[18] =
 {
 	0.15772'79714'74890'11956,

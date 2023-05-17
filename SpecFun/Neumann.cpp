@@ -79,6 +79,11 @@ void Neumann(double v, double* x, double* res, int n, double* Jpositive, double*
 	}
 }
 
+double Y_asymptotic(const double v, const double x)
+{
+	return -1.0 / M_PI * pow(x / 2, -v) * Gamma(v) * exp(0.25 * x * x / v);
+}
+
 const double eps = 1E-12;
 const double b0[] = {
 		-0.02150'51114'49657'55061,

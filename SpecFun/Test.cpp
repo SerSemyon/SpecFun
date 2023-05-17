@@ -660,7 +660,7 @@ void TestZ_vNext()
         LOG_DURATION("Z_2");
         for (int i = 0; i < n; i++)
         {
-            resZ[i] = Z_vNext(v, x[i], res0[i], res1[i]);
+            resZ[i] = Z_vNext(v-1, x[i], res1[i], res0[i]);
         }
     }
     for (int i = 0; i < n; i++)
@@ -668,7 +668,7 @@ void TestZ_vNext()
         if (abs(resZ[i] - res2[i]) > 1)
         {
             std::cout << "WARNING!!!" << std::endl;
-            std::cout << "TestZ_vNext failed! " << x[i] << " " << resZ[i] << " " << res2[i] << std::endl << std::endl;
+            std::cout << "TestZ_vNext failed! " << i << " " << x[i] << " " << resZ[i] << " " << res2[i] << std::endl << std::endl;
             successfully = false;
             break;
         }
@@ -680,4 +680,91 @@ void TestZ_vNext()
     delete[] resZ;
     if (successfully)
         std::cout << "TestZ_vNext OK" << std::endl << std::endl;
+}
+
+void TestJ_asymptotic()
+{
+    std::cout << "TestJ_asymptotic started" << std::endl;
+    int v = 10;
+    bool successfully = true;
+    int n = 100;
+    double* res1 = new double[n];
+    double* res2 = new double[n];
+    double* x = new double[n];
+    for (int i = 0; i < n; i++)
+    {
+        x[i] = i * 0.1;
+    }
+    {
+        LOG_DURATION("J");
+        J(v, x, res1, n);
+    }
+    {
+        LOG_DURATION("J_asymptotic");
+        for (int i = 0; i < n; i++)
+        {
+            res2[i] = J_asymptotic(v,x[i]);
+        }
+    }
+    for (int i = 0; i < n; i++)
+    {
+        if (abs(res1[i] - res2[i]) > epsilon)
+        {
+            std::cout << "WARNING!!!" << std::endl;
+            std::cout << "TestJ_asymptotic failed!" << x[i] << " " << res1[i] << " " << res2[i] << std::endl << std::endl;
+            successfully = false;
+            break;
+        }
+    }
+    delete[] x;
+    delete[] res1;
+    delete[] res2;
+    if (successfully)
+        std::cout << "TestJ_asymptotic OK" << std::endl << std::endl;
+}
+
+void TestY_asymptotic()
+{
+    std::cout << "TestY_asymptotic started" << std::endl;
+    int v = 1;
+    bool successfully = true;
+    int n = 1;
+    double* res0 = new double[n];
+    double* res1 = new double[n];
+    double* res2 = new double[n];
+    double* x = new double[n];
+    for (int i = 0; i < n; i++)
+    {
+        x[i] = (i+1) * 10;
+    }
+    {
+        LOG_DURATION("J");
+        J(v, x, res0, n);
+    }
+    {
+        LOG_DURATION("Y");
+        Neumann(v, x, res1, n, res0);
+    }
+    {
+        LOG_DURATION("Y_asymptotic");
+        for (int i = 0; i < n; i++)
+        {
+            res2[i] = Y_asymptotic(v, x[i]);
+        }
+    }
+    for (int i = 0; i < n; i++)
+    {
+        if (abs(res1[i] - res2[i]) > epsilon)
+        {
+            std::cout << "WARNING!!!" << std::endl;
+            std::cout << "TestY_asymptotic failed!" << x[i] << " " << res1[i] << " " << res2[i] << std::endl << std::endl;
+            successfully = false;
+            break;
+        }
+    }
+    delete[] x;
+    delete[] res1;
+    delete[] res2;
+    if (successfully)
+        std::cout << "TestY_asymptotic OK" << std::endl << std::endl;
 }

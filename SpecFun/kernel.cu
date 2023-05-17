@@ -11,19 +11,21 @@
 
 int main()
 {
-    TestBessel_CUDA();
-    TestJnew();
-    TestBesselOrderedSet();
-    TestJ0();
-    TestJ0_CUDA();
-    TestJ1();
-    TestJ1_CUDA();
-    //TestBesselNew();
-    TestNeumannCPU();
-    TestY0();
-    TestY1();
-    TestY0_CUDA();
-    TestY1_CUDA();
+    //TestBessel_CUDA();
+    //TestJnew();
+    //TestBesselOrderedSet();
+    //TestJ0();
+    //TestJ0_CUDA();
+    //TestJ1();
+    //TestJ1_CUDA();
+    ////TestBesselNew();
+    //TestNeumannCPU();
+    //TestY0();
+    //TestY1();
+    //TestY0_CUDA();
+    //TestY1_CUDA();
     TestZ_vNext();
-    TestChebyshevPolynomials();
+    //TestChebyshevPolynomials();
+    TestJ_asymptotic();
+    TestY_asymptotic();
 }

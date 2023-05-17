@@ -23,6 +23,10 @@ double cyl_next_order(double v, double x, double value_v, double value_v_minus_1
 /// <param name="x"> значения параметра </param>
 double J(double v, double x);
 
+double J_asymptotic(const double v, const double x);
+
+double Y_asymptotic(const double v, const double x);
+
 /// <summary>
 /// Вычисление функции Бесселя на CPU
 /// </summary>
