@@ -144,3 +144,6 @@ double Z_vNext(double v, double x, double Z_v, double Z_vPrev);
 /// <param name="Z_vNext"> Значение функции прядка v+1 </param>
 /// <returns></returns>
 double dZ(double v, double Z_vPrev, double Z_vNext);
+
+
+void dZ(double v, double* x, double* result, unsigned int size, double* Z_vPrev, double* Z_vNext);

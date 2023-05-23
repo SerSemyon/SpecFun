@@ -85,6 +85,7 @@
     <CudaCompile Include="Bessel.cu" />
     <CudaCompile Include="kernel.cu" />
     <CudaCompile Include="Neumann.cu" />
+    <CudaCompile Include="OtherFunctions.cu" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="BesselCPU.cpp" />

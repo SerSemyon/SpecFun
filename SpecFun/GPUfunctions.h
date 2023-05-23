@@ -45,3 +45,5 @@ void Y0_CUDA(const double* const x, double* result, const unsigned int size, con
 /// <param name="size"> количество точек </param>
 /// <param name="J1"> значения функции Бесселя первого порядка </param>
 void Y1_CUDA(const double* const x, double* result, const unsigned int size, const double* const J1);
+
+void dZ_CUDA(double* x, double* result, unsigned int size, double* Z_vPrev, double* Z_vNext);
