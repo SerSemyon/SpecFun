@@ -26,6 +26,7 @@ int main()
    // TestY0_CUDA();
    // TestY1_CUDA();
     TestZ_vNext();
+    TestCyl_next_order_CUDA();
    // TestChebyshevPolynomials();
    // Test_dZ();
    // TestJ_asymptotic();

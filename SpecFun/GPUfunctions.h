@@ -51,3 +51,5 @@ void Y1_CUDA(const double* const x, double* result, const unsigned int size, con
 void H1_CUDA(const double v, const double* const x, double* Re, double* Im, const unsigned int size);
 
 void dZ_CUDA(double* x, double* result, unsigned int size, double* Z_vPrev, double* Z_vNext);
+
+void cyl_next_order_CUDA(double v, double* x, double* result, unsigned int size, double* value_v, double* value_v_minus_1);

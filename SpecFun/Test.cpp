@@ -525,40 +525,6 @@ void TestY1_CUDA()
         std::cout << "TestY1_CUDA OK" << std::endl << std::endl;
 }
 
-//void TestBesselNew() {
-//    std::cout << "TestBesselNew started" << std::endl;
-//    int n = 256;
-//    double* x = new double[n];
-//    double* resGPU = new double[n];
-//    double* resCPU = new double[n];
-//    for (int i = 0; i < n; i++)
-//    {
-//        x[i] = 0.0001 * i;
-//    }
-//
-//    {
-//        LOG_DURATION("CPU clock");
-//        J(2, x, resCPU, n);
-//    }
-//
-//    {
-//        LOG_DURATION("GPU clock");
-//        BesselWithCudaNew(2, x, resGPU, n);
-//    }
-//
-//    for (int i = 0; i < n; i++)
-//    {
-//        if (abs(resGPU[i] - resCPU[i]) > 1E-13)
-//        {
-//            std::cout << "WARNING!!!" << std::endl;
-//            std::cout << "TestBessel failed! point:" << x[i] << " |resGPU-resCPU|=" << abs(resGPU[i] - resCPU[i]) << std::endl << std::endl;
-//            return;
-//        }
-//        //std::cout << x[i] << '\t' << resGPU[i] << " " << resCPU[i] << std::endl;
-//    }
-//    std::cout << "TestBesselNew OK" << std::endl << std::endl;
-//}
-
 double T_recursively(int n, double x)
 {
     if (n == 0)
@@ -735,6 +701,59 @@ void TestZ_vNext()
     delete[] resN;
     if (successfully)
         std::cout << "TestZ_vNext OK" << std::endl << std::endl;
+}
+
+void TestCyl_next_order_CUDA()
+{
+    std::cout << "TestCyl_next_order_CUDA started" << std::endl;
+    int v = 0;
+    int n = 49;
+    bool successfully = true;
+    double* res0 = new double[n];
+    double* res1 = new double[n];
+    double* resCPU = new double[n];
+    double* resGPU = new double[n];
+    double* x = new double[n];
+    for (int i = 0; i < n; i++)
+    {
+        x[i] = (i + 1) * 0.1;
+    }
+    double* Js = new double[n];
+    {
+        LOG_DURATION("J_0");
+        J(v, x, res0, n);
+    }
+    v = 1;
+    {
+        LOG_DURATION("J_1");
+        J(v, x, res1, n);
+    }
+    v = 2;
+    {
+        LOG_DURATION("CPU");
+        cyl_next_order(v - 1, x, resCPU, n, res1, res0);
+    }
+    {
+        LOG_DURATION("GPU");
+        cyl_next_order_CUDA(v - 1, x, resGPU, n, res1, res0);
+    }
+    for (int i = 0; i < n; i++)
+    {
+        if (abs(resCPU[i] - resGPU[i]) > epsilon)
+        {
+            std::cout << "WARNING!!!" << std::endl;
+            std::cout << "TestCyl_next_order_CUDA failed! " << i << " " << x[i] << " " << resCPU[i] << " " << resGPU[i] << std::endl << std::endl;
+            successfully = false;
+            break;
+        }
+    }
+    delete[] x;
+    delete[] res0;
+    delete[] res1;
+    delete[] resCPU;
+    delete[] resGPU;
+    if (successfully)
+        std::cout << "TestCyl_next_order_CUDA OK" << std::endl << std::endl;
 }
 
 void TestJ_asymptotic()
