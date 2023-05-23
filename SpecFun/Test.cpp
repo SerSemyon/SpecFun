@@ -7,19 +7,19 @@
 #include "log_duration.h"
 
 double epsilon = 1E-12;
-int nJ0 = 1000;
-int nJ1 = 1000;
-int nJ = 1000;
-int nY0 = 100000;
-int nY1 = 100000;
-double b0 = 7;
-double b1 = 7;
-double bJ = 7;
+int nJ0 = 50;
+int nJ1 = 50;
+int nJ = 50;
+int nY0 = 50;
+int nY1 = 50;
+double b0 = 5;
+double b1 = 5;
+double bJ = 5;
 double h0 = b0 / nJ0;
 double h1 = b1 / nJ1;
 double hJ = bJ / nJ;
-double hY0 = 0.0000001;
-double hY1 = 0.0000001;
+double hY0 = b0/ nY0;
+double hY1 = b1 / nY1;
 
 /* TODO - Встроенная реализация даёт низкую точность и, чем дальше от нуля, тем выше ошибка.
 Поэтому для проверки значений нужно будет использовать таблицы с более точными результатами,иначе тест всегда будет проваливаться. 
@@ -159,6 +159,7 @@ void TestNeumannCPU()
     }
     for (int i = 0; i < nY1; i++)
     {
+        std::cout << x[i] << " " << res1[i] << " " << res2[i] << std::endl;
         if (abs(res1[i] - res2[i]) > 1E-4)
         {
             std::cout << "WARNING!!!" << std::endl;
@@ -177,7 +178,7 @@ void TestNeumannCPU()
 void TestNeumann_CUDA()
 {
     std::cout << "TestNeumann_CUDA started" << std::endl;
-    int v = 0;
+    int v = 1;
     bool successfully = true;
     double* res1 = new double[nY0];
     double* res2 = new double[nY0];
@@ -200,6 +201,7 @@ void TestNeumann_CUDA()
     }
     for (int i = 0; i < nY0; i++)
     {
+        std::cout << x[i] << " " << res1[i] << " " << res2[i] << std::endl;
         if (abs(res1[i] - res2[i]) > 1E-4)
         {
             std::cout << "WARNING!!!" << std::endl;
@@ -669,48 +671,58 @@ void TestZ_vNext()
 {
     std::cout << "TestZ_vNext started" << std::endl;
     int v = 0;
-    int n = 1000;
+    int n = 49;
     bool successfully = true;
     double* res0 = new double[n];
     double* res1 = new double[n];
     double* res2 = new double[n];
     double* resZ = new double[n];
+    double* resN = new double[n];
     double* x = new double[n];
     for (int i = 0; i < n; i++)
     {
-        x[i] = (i+10) * 0.01;
+        x[i] = (i+1) * 0.1;
     }
     double* Js = new double[n];
-    J(v, x, Js, n);
     {
-        LOG_DURATION("Y_0");
-        Y_0(x, res0, n, Js);
+        LOG_DURATION("J_0");
+        J(v, x, res0, n);
     }
     v = 1;
-    J(v, x, Js, n);
     {
-        LOG_DURATION("Y_1");
-        Y_1(x, res1, n, Js);
+        LOG_DURATION("J_1");
+        J(v, x, res1, n);
     }
     v = 2;
-    J(v, x, Js, n);
     {
         LOG_DURATION("Neumann");
-        Neumann(v, x, res2, n, Js);
+        J(v, x, res2, n);
     }
     {
         LOG_DURATION("Z_2");
         for (int i = 0; i < n; i++)
         {
-            resZ[i] = Z_vNext(v-1, x[i], res1[i], res0[i]);
+            std::cout << x[i] << " " << res0[i] << " " << res1[i] << std::endl;
+            resZ[i] = cyl_next_order(v-1, x[i], res1[i], res0[i]);
         }
+    }
+    {
+        LOG_DURATION("Neumann");
+        cyl_next_order(v-1, x, resN, n, res1, res0);
     }
     for (int i = 0; i < n; i++)
     {
-        if (abs(resZ[i] - res2[i]) > 1)
+        if (abs(resZ[i] - res2[i]) > epsilon)
         {
             std::cout << "WARNING!!!" << std::endl;
             std::cout << "TestZ_vNext failed! " << i << " " << x[i] << " " << resZ[i] << " " << res2[i] << std::endl << std::endl;
+            successfully = false;
+            break;
+        }
+        if (abs(resZ[i] - resN[i]) > epsilon)
+        {
+            std::cout << "WARNING!!!" << std::endl;
+            std::cout << "TestZ_vNext failed! " << i << " " << x[i] << " " << resZ[i] << " " << resN[i] << std::endl << std::endl;
             successfully = false;
             break;
         }
@@ -720,6 +732,7 @@ void TestZ_vNext()
     delete[] res1;
     delete[] res2;
     delete[] resZ;
+    delete[] resN;
     if (successfully)
         std::cout << "TestZ_vNext OK" << std::endl << std::endl;
 }

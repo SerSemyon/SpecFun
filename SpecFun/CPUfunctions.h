@@ -8,13 +8,16 @@ long long Fact(int x);
 double Gamma(double x);
 
 /// <summary>
-/// Вычисление функции порядка v+1 через значения порядка v и v-1
+/// Вычисляет значения любой цилиндрической фукнции порядка v+1 используя значения известные значения порядка v, v-1.
 /// </summary>
-/// <param name="v"> порядок функции </param>
-/// <param name="x"> значения параметра </param>
-/// <param name="value_v"> значение порядка v </param>
-/// <param name="value_v_minus_1"> значение порядка v-1 </param>
+/// <param name="v"> Порядок функции </param>
+/// <param name="x"> Значение параметра </param>
+/// <param name="Z_v"> Значение фукнции порядка v </param>
+/// <param name="Z_vPrev"> Значение функции порядка v-1</param>
+/// <returns></returns>
 double cyl_next_order(double v, double x, double value_v, double value_v_minus_1);
+
+void cyl_next_order(double v, double* x, double* result, unsigned int size, double* value_v, double* value_v_minus_1);
 
 /// <summary>
 /// Вычисление функции Бесселя на CPU для одной точки
@@ -125,16 +128,6 @@ void BesselOrderedSet(double v, double* x, double* res, int n);
 /// <param name="res"> Указатель на результат </param>
 /// <param name="n"> Количество точек </param>
 void Jnew(double v, double* x, double* res, int n);
-
-/// <summary>
-/// Вычисляет значения любой цилиндрической фукнции порядка v+1 используя значения известные значения порядка v, v-1.
-/// </summary>
-/// <param name="v"> Порядок функции </param>
-/// <param name="x"> Значение параметра </param>
-/// <param name="Z_v"> Значение фукнции порядка v </param>
-/// <param name="Z_vPrev"> Значение функции порядка v-1</param>
-/// <returns></returns>
-double Z_vNext(double v, double x, double Z_v, double Z_vPrev);
 
 /// <summary>
 /// Вычисление производной любой цилиндрической функции через известные значения функции порядка v-1 и v+1.
