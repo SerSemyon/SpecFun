@@ -145,5 +145,8 @@ double Z_vNext(double v, double x, double Z_v, double Z_vPrev);
 /// <returns></returns>
 double dZ(double v, double Z_vPrev, double Z_vNext);
 
+void H1(const double v, const double* const x, double* Re, double* Im, const unsigned int size);
 
 void dZ(double v, double* x, double* result, unsigned int size, double* Z_vPrev, double* Z_vNext);
+
+void J_negative(const int n, double* result, const unsigned int size, const double* const J_positive);

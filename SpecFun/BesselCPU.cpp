@@ -2,11 +2,6 @@
 #include "CPUfunctions.h"
 #include <cmath>
 
-double cyl_next_order(double x, double v, double value_v, double value_v_minus_1)
-{
-	return 2 * v * value_v / x - value_v_minus_1;
-}
-
 const double eps = 1E-12;
 
 void J(const double v, const double* x, double* result, const unsigned int size) {
@@ -184,4 +179,22 @@ void BesselOrderedSet(double v, double* x, double* res, int n) {
 		res[i] *= pow(x[i] * 0.5, v);
 	}
 	delete[] aPrev;
+}
+
+void J_negative(const int n, double* result, const unsigned int size, const double* const J_positive)
+{
+	if (n % 2 == 0)
+	{
+		for (int i = 0; i < size; i++)
+		{
+			result[i] = J_positive[i];
+		}
+	}
+	else
+	{
+		for (int i = 0; i < size; i++)
+		{
+			result[i] = -J_positive[i];
+		}
+	}
 }

@@ -11,6 +11,7 @@ void TestY1();
 void TestBessel_CUDA();
 void TestJ0_CUDA();
 void TestJ1_CUDA();
+void TestNeumann_CUDA();
 void TestY0_CUDA();
 void TestY1_CUDA();
 void TestChebyshevPolynomials();

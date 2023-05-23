@@ -5,20 +5,22 @@
 
 const double C = 0.5772156;
 
-void Neumann(int v, double* x, double* res, int n, double* Jpositive)
+void Neumann(int v, double* x, double* res, int size, double* Jpositive)
 {
-	unsigned int factKN = Fact(v);
+	unsigned int factV_minus_one = Fact(v - 1);
+	unsigned int factV = factV_minus_one * v;
+	unsigned int factKN = factV;
 	double S_2 = 0;
 	unsigned int factK = 1;
 	int sign = 1;
-	double M = 1.0 / Fact(v);
+	double M = 1.0 / factV;
 	for (int i = 1; i <= v; i++)
 	{
 		S_2 += 1.0 / i;
 	}
 	M *= S_2;
-	double* sumWithPsi = new double[n];
-	for (int i = 0; i < n; i++)
+	double* sumWithPsi = new double[size];
+	for (int i = 0; i < size; i++)
 	{
 		sumWithPsi[i] = M;
 	}
@@ -29,18 +31,18 @@ void Neumann(int v, double* x, double* res, int n, double* Jpositive)
 		factKN *= (v + k);
 		S_2 += 1.0 / k + 1.0 / (k + v);
 		M = sign * S_2 / (factK * factKN);
-		for (int i = 0; i < n; i++)
+		for (int i = 0; i < size; i++)
 		{
 			sumWithPsi[i] += std::pow(0.5 * x[i], 2 * k) * M;
 		}
 	}
-	for (int i = 0; i < n; i++)
+	for (int i = 0; i < size; i++)
 	{
 		sumWithPsi[i] *= std::pow(0.5 * x[i], v);
 	}
-	double* S_1 = new double[n];
-	double f_1 = Fact(v - 1);
-	for (int i = 0; i < n; i++)
+	double* S_1 = new double[size];
+	double f_1 = factV_minus_one;
+	for (int i = 0; i < size; i++)
 	{
 		S_1[i] = f_1;
 	}
@@ -48,12 +50,12 @@ void Neumann(int v, double* x, double* res, int n, double* Jpositive)
 	{
 		f_1 *= (v - k - 1);
 		f_1 /= k;
-		for (int i = 0; i < n; i++)
+		for (int i = 0; i < size; i++)
 		{
 			S_1[i] += f_1 * std::pow(0.5 * x[i], 2 * k);
 		}
 	}
-	for (int i = 0; i < n; i++)
+	for (int i = 0; i < size; i++)
 	{
 		res[i] = 2 * Jpositive[i] * (std::log(0.5 * x[i]) + C);
 		res[i] -= sumWithPsi[i];

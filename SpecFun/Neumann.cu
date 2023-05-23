@@ -7,6 +7,7 @@
 #include "CPUfunctions.h"
 #include "GPUfunctions.h"
 #include <iostream>
+#include "log_duration.h"
 
 /// <summary>
 /// Код одной нити GPU
@@ -71,10 +72,13 @@ void Y0_CUDA(const double* const x, double* result, const unsigned int size, con
     cudaMalloc((void**)&dev_J0, size * sizeof(double));
     cudaMemcpy(dev_J0, J0, size * sizeof(double), cudaMemcpyHostToDevice);
 
-    Y0_OneThread << <(size + 127) / 128, 128 >> > (dev_x, dev_res, size, dev_J0);
+    {
+        LOG_DURATION("GPU without data transfers");
+        Y0_OneThread << <(size + 127) / 128, 128 >> > (dev_x, dev_res, size, dev_J0);
 
-    cudaGetLastError();
-    cudaDeviceSynchronize();
+        cudaGetLastError();
+        cudaDeviceSynchronize();
+    }
 
     cudaMemcpy(result, dev_res, size * sizeof(double), cudaMemcpyDeviceToHost);
     
@@ -148,14 +152,130 @@ void Y1_CUDA(const double* const x, double* result, const unsigned int size, con
     cudaMalloc((void**)&dev_J1, size * sizeof(double));
     cudaMemcpy(dev_J1, J1, size * sizeof(double), cudaMemcpyHostToDevice);
 
-    Y1_OneThread << <(size + 127) / 128, 128 >> > (dev_x, dev_res, size, dev_J1);
 
-    cudaGetLastError();
-    cudaDeviceSynchronize();
+    {
+        LOG_DURATION("GPU without data transfers");
+        Y1_OneThread << <(size + 127) / 128, 128 >> > (dev_x, dev_res, size, dev_J1);
+
+        cudaGetLastError();
+        cudaDeviceSynchronize();
+    }
 
     cudaMemcpy(result, dev_res, size * sizeof(double), cudaMemcpyDeviceToHost);
 
     cudaFree(dev_res);
     cudaFree(dev_x);
     cudaFree(dev_J1);
+}
+
+__global__ void Neumann_OneThread(double v, double* x, double* res, int size, double* Jpositive, double* Jnegative, unsigned int factV_minus_one, unsigned int factV)
+{
+    const double C = 0.5772156;
+    double arg = v * M_PI;
+    int i = threadIdx.x + blockIdx.x * blockDim.x;
+    while (i < size)
+    {
+        if (v != (long long)v) // Если не целое
+        {
+            for (int i = 0; i < size; i++)
+            {
+                res[i] = (Jpositive[i] * cos(arg) - Jnegative[i]) / sin(arg);
+            }
+        }
+        else
+        {
+            unsigned int factKN = factV;
+            double S_2 = 0;
+            unsigned int factK = 1;
+            int sign = 1;
+            double M = 1.0 / factV;
+            for (int i = 1; i <= v; i++)
+            {
+                S_2 += 1.0 / i;
+            }
+            M *= S_2;
+            double* sumWithPsi = new double[size];
+            for (int i = 0; i < size; i++)
+            {
+                sumWithPsi[i] = M;
+            }
+            for (int k = 1; k < 15; k++)
+            {
+                sign = -sign;
+                factK *= k;
+                factKN *= (v + k);
+                S_2 += 1.0 / k + 1.0 / (k + v);
+                M = sign * S_2 / (factK * factKN);
+                for (int i = 0; i < size; i++)
+                {
+                    sumWithPsi[i] += std::pow(0.5 * x[i], 2 * k) * M;
+                }
+            }
+            for (int i = 0; i < size; i++)
+            {
+                sumWithPsi[i] *= std::pow(0.5 * x[i], v);
+            }
+            double* S_1 = new double[size];
+            double f_1 = factV_minus_one;
+            for (int i = 0; i < size; i++)
+            {
+                S_1[i] = f_1;
+            }
+            for (int k = 1; k < v; k++)
+            {
+                f_1 *= (v - k - 1);
+                f_1 /= k;
+                for (int i = 0; i < size; i++)
+                {
+                    S_1[i] += f_1 * std::pow(0.5 * x[i], 2 * k);
+                }
+            }
+            for (int i = 0; i < size; i++)
+            {
+                res[i] = 2 * Jpositive[i] * (std::log(0.5 * x[i]) + C);
+                res[i] -= sumWithPsi[i];
+                if (v > 0)
+                    res[i] -= std::pow(0.5 * x[i], -v) * S_1[i];
+                res[i] /= M_PI;
+            }
+        }
+        i += blockDim.x * gridDim.x;
+    } 
+}
+
+void Neumann_CUDA(double v, const double* const x, double* result, const unsigned int size, const double* const Jpositive, const double* const Jnegative)
+{
+    double* dev_x = 0;
+    double* dev_res = 0;
+    double* dev_Jpositive = 0;
+    double* dev_Jnegative = 0;
+
+    cudaMalloc((void**)&dev_x, size * sizeof(double));
+    cudaMemcpy(dev_x, x, size * sizeof(double), cudaMemcpyHostToDevice);
+
+    cudaMalloc((void**)&dev_res, size * sizeof(double));
+
+    cudaMalloc((void**)&dev_Jpositive, size * sizeof(double));
+    cudaMemcpy(dev_Jpositive, Jpositive, size * sizeof(double), cudaMemcpyHostToDevice);
+
+    cudaMalloc((void**)&dev_Jnegative, size * sizeof(double));
+    cudaMemcpy(dev_Jnegative, Jnegative, size * sizeof(double), cudaMemcpyHostToDevice);
+
+
+    {
+        LOG_DURATION("GPU without data transfers");
+        unsigned int factV_minus_one = Fact(v - 1);
+        unsigned int factV = factV_minus_one * v;
+        Neumann_OneThread << <(size + 127) / 128, 128 >> > (v, dev_x, dev_res, size, dev_Jpositive, dev_Jnegative, factV_minus_one, factV);
+
+        cudaGetLastError();
+        cudaDeviceSynchronize();
+    }
+
+    cudaMemcpy(result, dev_res, size * sizeof(double), cudaMemcpyDeviceToHost);
+
+    cudaFree(dev_res);
+    cudaFree(dev_x);
+    cudaFree(dev_Jpositive);
+    cudaFree(dev_Jnegative);
 }

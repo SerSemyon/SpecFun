@@ -7,15 +7,19 @@
 #include "log_duration.h"
 
 double epsilon = 1E-12;
-int nJ0 = 1000000;
-int nJ1 = 1000000;
-int nJ = 1000000;
+int nJ0 = 1000;
+int nJ1 = 1000;
+int nJ = 1000;
+int nY0 = 100000;
+int nY1 = 100000;
 double b0 = 7;
 double b1 = 7;
 double bJ = 7;
 double h0 = b0 / nJ0;
 double h1 = b1 / nJ1;
 double hJ = bJ / nJ;
+double hY0 = 0.0000001;
+double hY1 = 0.0000001;
 
 /* TODO - Встроенная реализация даёт низкую точность и, чем дальше от нуля, тем выше ошибка.
 Поэтому для проверки значений нужно будет использовать таблицы с более точными результатами,иначе тест всегда будет проваливаться. 
@@ -135,24 +139,25 @@ void TestJ1()
 void TestNeumannCPU()
 {
     std::cout << "TestNeumannCPU started" << std::endl;
-    int v = 0;
-    int n = 1000000;
+    int v = 1;
     bool successfully = true;
-    double* res1 = new double[n];
-    double* res2 = new double[n];
-    double* x = new double[n];
-    for (int i = 0; i < n; i++)
+    double* res1 = new double[nY1];
+    double* res2 = new double[nY1];
+    double* x = new double[nY1];
+    for (int i = 0; i < nY1; i++)
     {
-        x[i] = i * 0.00000001;
+        x[i] = i * hY1;
         res1[i] = __std_smf_cyl_neumann(v, x[i]);
     }
-    double* Js = new double[n];
-    J(v, x, Js, n);
+    double* J_pos = new double[nY1];
+    double* J_neg = new double[nY1];
+    J(v, x, J_pos, nY1);
+    J_negative(v, J_neg, nY1, J_pos);
     {
         LOG_DURATION("Neumann");
-        Neumann(v, x, res2, n, Js);
+        Neumann(v, x, res2, nY1, J_pos, J_neg);
     }
-    for (int i = 0; i < n; i++)
+    for (int i = 0; i < nY1; i++)
     {
         if (abs(res1[i] - res2[i]) > 1E-4)
         {
@@ -169,38 +174,78 @@ void TestNeumannCPU()
         std::cout << "TestNeumannCPU OK" << std::endl << std::endl;
 }
 
+void TestNeumann_CUDA()
+{
+    std::cout << "TestNeumann_CUDA started" << std::endl;
+    int v = 0;
+    bool successfully = true;
+    double* res1 = new double[nY0];
+    double* res2 = new double[nY0];
+    double* x = new double[nY0];
+    for (int i = 0; i < nY0; i++)
+    {
+        x[i] = (i + 1) * hY0;
+    }
+    double* J_pos = new double[nY0];
+    double* J_neg = new double[nY0];
+    J(v, x, J_pos, nY0);
+    J_negative(v, J_neg, nY0, J_pos);
+    {
+        LOG_DURATION("CPU");
+        Neumann(v, x, res1, nY0, J_pos, J_neg);
+    }
+    {
+        LOG_DURATION("GPU");
+        Neumann_CUDA(v, x, res2, nY0, J_pos, J_neg);
+    }
+    for (int i = 0; i < nY0; i++)
+    {
+        if (abs(res1[i] - res2[i]) > 1E-4)
+        {
+            std::cout << "WARNING!!!" << std::endl;
+            std::cout << "TestNeumann_CUDA failed!" << x[i] << " " << res1[i] << " " << res2[i] << std::endl << std::endl;
+            successfully = false;
+            break;
+        }
+    }
+    delete[] x;
+    delete[] res1;
+    delete[] res2;
+    if (successfully)
+        std::cout << "TestNeumann_CUDA OK" << std::endl << std::endl;
+}
+
 void TestY0()
 {
     std::cout << "TestY0 started" << std::endl;
     int v = 0;
-    int n = 1000000;
     bool successfully = true;
-    double* res1 = new double[n];
-    double* res2 = new double[n];
-    double* res3 = new double[n];
-    double* x = new double[n];
-    for (int i = 0; i < n; i++)
+    double* res1 = new double[nY0];
+    double* res2 = new double[nY0];
+    double* res3 = new double[nY0];
+    double* x = new double[nY0];
+    for (int i = 0; i < nY0; i++)
     {
-        x[i] = i * 0.00000001;
+        x[i] = i * hY0;
     }
-    double* Js = new double[n];
-    J(v, x, Js, n);
+    double* Js = new double[nY0];
+    J(v, x, Js, nY0);
     {
         LOG_DURATION("Y_0");
-        for (int i = 0; i < n; i++)
+        for (int i = 0; i < nY0; i++)
         {
             res1[i] = Y_0(x[i], Js[i]);
         }
     }
     {
         LOG_DURATION("Neumann");
-        Neumann(v, x, res2, n, Js);
+        Neumann(v, x, res2, nY0, Js);
     }
     {
         LOG_DURATION("Y_0");
-        Y_0(x, res3, n, Js);
+        Y_0(x, res3, nY0, Js);
     }
-    for (int i = 0; i < n; i++)
+    for (int i = 0; i < nY0; i++)
     {
         if (abs(res1[i] - res2[i]) > 1E-4)
         {
@@ -229,34 +274,33 @@ void TestY1()
 {
     std::cout << "TestY1 started" << std::endl;
     int v = 1;
-    int n = 1000000;
     bool successfully = true;
-    double* res1 = new double[n];
-    double* res2 = new double[n];
-    double* res3 = new double[n];
-    double* x = new double[n];
-    for (int i = 0; i < n; i++)
+    double* res1 = new double[nY1];
+    double* res2 = new double[nY1];
+    double* res3 = new double[nY1];
+    double* x = new double[nY1];
+    for (int i = 0; i < nY1; i++)
     {
-        x[i] = i * 0.00000001;
+        x[i] = i * hY1;
     }
-    double* Js = new double[n];
-    J(v, x, Js, n);
+    double* Js = new double[nY1];
+    J(v, x, Js, nY1);
     {
         LOG_DURATION("Y_1");
-        for (int i = 0; i < n; i++)
+        for (int i = 0; i < nY1; i++)
         {
             res1[i] = Y_1(x[i], Js[i]);
         }
     }
     {
         LOG_DURATION("Neumann");
-        Neumann(v, x, res2, n, Js);
+        Neumann(v, x, res2, nY1, Js);
     }
     {
         LOG_DURATION("Y_1");
-        Y_1(x, res3, n, Js);
+        Y_1(x, res3, nY1, Js);
     }
-    for (int i = 0; i < n; i++)
+    for (int i = 0; i < nY1; i++)
     {
         if (abs(res1[i] - res2[i]) > 1E-4)
         {
@@ -284,7 +328,7 @@ void TestY1()
 void TestBessel_CUDA()
 {
     std::cout << "TestBesselCuda started" << std::endl;
-    int v = 1;
+    int v = 0;
     bool successfully = true;
     double h = bJ / nJ;
     double* x = new double[nJ];
@@ -403,27 +447,26 @@ void TestY0_CUDA()
 {
     std::cout << "TestY0_CUDA started" << std::endl;
     int v = 0;
-    int n = 1000000;
     bool successfully = true;
-    double* res1 = new double[n];
-    double* res2 = new double[n];
-    double* x = new double[n];
-    for (int i = 0; i < n; i++)
+    double* res1 = new double[nY0];
+    double* res2 = new double[nY0];
+    double* x = new double[nY0];
+    for (int i = 0; i < nY0; i++)
     {
-        x[i] = (i+1) * 0.00000001;
+        x[i] = (i+1) * hY0;
     }
-    double* Js = new double[n];
-    J(v, x, Js, n);
+    double* Js = new double[nY0];
+    J(v, x, Js, nY0);
     {
         LOG_DURATION("CPU");
-        Y_0(x, res1, n, Js);
+        Y_0(x, res1, nY0, Js);
         //Neumann(v, x, res1, n, Js);
     }
     {
         LOG_DURATION("GPU");
-        Y0_CUDA(x, res2, n, Js);
+        Y0_CUDA(x, res2, nY0, Js);
     }
-    for (int i = 0; i < n; i++)
+    for (int i = 0; i < nY0; i++)
     {
         if (abs(res1[i] - res2[i]) > 1E-4)
         {
@@ -444,27 +487,26 @@ void TestY1_CUDA()
 {
     std::cout << "TestY1_CUDA started" << std::endl;
     int v = 1;
-    int n = 1000000;
     bool successfully = true;
-    double* res1 = new double[n];
-    double* res2 = new double[n];
-    double* x = new double[n];
-    for (int i = 0; i < n; i++)
+    double* res1 = new double[nY1];
+    double* res2 = new double[nY1];
+    double* x = new double[nY1];
+    for (int i = 0; i < nY1; i++)
     {
-        x[i] = (i + 1) * 0.00000001;
+        x[i] = (i + 1) * hY1;
     }
-    double* Js = new double[n];
-    J(v, x, Js, n);
+    double* Js = new double[nY1];
+    J(v, x, Js, nY1);
     {
         LOG_DURATION("CPU");
-        Y_1(x, res1, n, Js);
+        Y_1(x, res1, nY1, Js);
         //Neumann(v, x, res1, n, Js);
     }
     {
         LOG_DURATION("GPU");
-        Y1_CUDA(x, res2, n, Js);
+        Y1_CUDA(x, res2, nY1, Js);
     }
-    for (int i = 0; i < n; i++)
+    for (int i = 0; i < nY1; i++)
     {
         if (abs(res1[i] - res2[i]) > 1E-4)
         {
