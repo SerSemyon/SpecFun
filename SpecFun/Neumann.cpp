@@ -3,7 +3,10 @@
 #include "CPUfunctions.h"
 #include <cmath>
 
+const double epsilon = 1E-12;
 const double C = 0.5772156;
+
+int max_iter = 10000;
 
 void Neumann(int v, double* x, double* res, int size, double* Jpositive)
 {
@@ -65,6 +68,56 @@ void Neumann(int v, double* x, double* res, int size, double* Jpositive)
 	}
 }
 
+double Neumann(int v, double x, double Jpositive)
+{
+	long long factV_minus_one = Fact(v - 1);
+	long long factV = Fact(v);
+	double S_2 = 0;
+	int sign = 1;
+	double M = 1.0 / factV;
+	for (int i = 1; i <= v; i++)
+	{
+		S_2 += 1.0 / i;
+	}
+	M *= S_2;
+	double sumWithPsi = M;
+	double prev;
+	double diff;
+	double cur = M;
+	double mul = 1.0/ factV;
+	int k = 1;
+	do {
+		prev = cur;
+		sign = -sign;
+		mul /= k * (v + k);
+		S_2 += 1.0 / k + 1.0 / (k + v);
+		M = sign * S_2 * mul;
+		cur = std::pow(0.5 * x, 2 * k) * M;
+		sumWithPsi += cur;
+		k++;
+		if (k > max_iter)
+			break;
+		diff = abs(cur - prev);
+	} while (diff > epsilon);
+	sumWithPsi *= std::pow(0.5 * x, v);
+	double f_1 = factV_minus_one;
+	double S_1 = f_1;
+	for (int k = 1; k < v; k++)
+	{
+		double multiply = v - k - 1;
+		if (multiply != 0)
+			f_1 *= multiply;
+		f_1 /= k;
+		S_1 += f_1 * std::pow(0.5 * x, 2 * k);
+	}
+	double res = 2 * Jpositive * (std::log(0.5 * x) + C);
+	res -= sumWithPsi;
+	if (v > 0)
+		res -= std::pow(0.5 * x, -v) * S_1;
+	res /= M_PI;
+	return res;
+}
+
 void Neumann(double v, double* x, double* res, int n, double* Jpositive, double* Jnegative)
 {
 	double arg = v * M_PI;
@@ -77,7 +130,11 @@ void Neumann(double v, double* x, double* res, int n, double* Jpositive, double*
 	}
 	else
 	{
-		Neumann(v, x, res, n, Jpositive);
+		for (int i = 0; i < n; i++)
+		{
+			res[i] = Neumann(v, x[i], Jpositive[i]);
+		}
+		//Neumann(v, x, res, n, Jpositive);
 	}
 }
 

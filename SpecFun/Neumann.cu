@@ -170,6 +170,7 @@ void Y1_CUDA(const double* const x, double* result, const unsigned int size, con
 
 __global__ void Neumann_OneThread(double v, double* x, double* res, int size, double* Jpositive, double* Jnegative, unsigned int factV_minus_one, unsigned int factV)
 {
+    const double epsilon = 1E-12;
     const double C = 0.5772156;
     double arg = v * M_PI;
     int i = threadIdx.x + blockIdx.x * blockDim.x;
@@ -184,9 +185,7 @@ __global__ void Neumann_OneThread(double v, double* x, double* res, int size, do
         }
         else
         {
-            unsigned int factKN = factV;
             double S_2 = 0;
-            unsigned int factK = 1;
             int sign = 1;
             double M = 1.0 / factV;
             for (int i = 1; i <= v; i++)
@@ -194,50 +193,41 @@ __global__ void Neumann_OneThread(double v, double* x, double* res, int size, do
                 S_2 += 1.0 / i;
             }
             M *= S_2;
-            double* sumWithPsi = new double[size];
-            for (int i = 0; i < size; i++)
-            {
-                sumWithPsi[i] = M;
-            }
-            for (int k = 1; k < 15; k++)
-            {
+            double sumWithPsi = M;
+            double prev;
+            double diff;
+            double cur = M;
+            double mul = 1.0 / factV;
+            int k = 1;
+            do {
+                prev = cur;
                 sign = -sign;
-                factK *= k;
-                factKN *= (v + k);
+                mul /= k * (v + k);
                 S_2 += 1.0 / k + 1.0 / (k + v);
-                M = sign * S_2 / (factK * factKN);
-                for (int i = 0; i < size; i++)
-                {
-                    sumWithPsi[i] += std::pow(0.5 * x[i], 2 * k) * M;
-                }
-            }
-            for (int i = 0; i < size; i++)
-            {
-                sumWithPsi[i] *= std::pow(0.5 * x[i], v);
-            }
-            double* S_1 = new double[size];
+                M = sign * S_2 * mul;
+                cur = std::pow(0.5 * x[i], 2 * k) * M;
+                sumWithPsi += cur;
+                k++;
+                //if (k > max_iter)
+                //    break;
+                diff = abs(cur - prev);
+            } while (diff > epsilon);
+            sumWithPsi *= std::pow(0.5 * x[i], v);
             double f_1 = factV_minus_one;
-            for (int i = 0; i < size; i++)
-            {
-                S_1[i] = f_1;
-            }
+            double S_1 = f_1;
             for (int k = 1; k < v; k++)
             {
-                f_1 *= (v - k - 1);
+                double multiply = v - k - 1;
+                if (multiply != 0)
+                    f_1 *= multiply;
                 f_1 /= k;
-                for (int i = 0; i < size; i++)
-                {
-                    S_1[i] += f_1 * std::pow(0.5 * x[i], 2 * k);
-                }
+                S_1 += f_1 * std::pow(0.5 * x[i], 2 * k);
             }
-            for (int i = 0; i < size; i++)
-            {
-                res[i] = 2 * Jpositive[i] * (std::log(0.5 * x[i]) + C);
-                res[i] -= sumWithPsi[i];
-                if (v > 0)
-                    res[i] -= std::pow(0.5 * x[i], -v) * S_1[i];
-                res[i] /= M_PI;
-            }
+            res[i] = 2 * Jpositive[i] * (std::log(0.5 * x[i]) + C);
+            res[i] -= sumWithPsi;
+            if (v > 0)
+                res[i] -= std::pow(0.5 * x[i], -v) * S_1;
+            res[i] /= M_PI;
         }
         i += blockDim.x * gridDim.x;
     } 
