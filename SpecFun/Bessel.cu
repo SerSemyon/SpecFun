@@ -294,3 +294,60 @@ void J1_CUDA(const double* const x, double* result, const unsigned int size)
     cudaFree(dev_res);
     cudaFree(dev_x);
 }
+
+void BesselWithCuda(const double v, const double* const x, double* result, const unsigned int size_x, const unsigned int size_v)
+{
+    double* dev_x = 0;
+    double* dev_res_0 = 0;
+    double* dev_res_1 = 0;
+    double* dev_res = 0;
+    double* dev_res_rec = 0;
+
+    double* res = new double[size_x];
+    double* res_rec = new double[size_x];
+
+    cudaMalloc((void**)&dev_res_0, size_x * sizeof(double));
+    cudaMalloc((void**)&dev_res_1, size_x * sizeof(double));
+    cudaMalloc((void**)&dev_res, size_x * sizeof(double));
+    cudaMalloc((void**)&dev_res_rec, size_x * sizeof(double));
+    cudaMalloc((void**)&dev_x, size_x * sizeof(double));
+    cudaMemcpy(dev_x, x, size_x * sizeof(double), cudaMemcpyHostToDevice);
+
+    {
+        LOG_DURATION("GPU without data transfers");
+        J0_OneThread << <(size_x + 127) / 128, 128 >> > (dev_x, dev_res_0, size_x);
+        J1_OneThread << <(size_x + 127) / 128, 128 >> > (dev_x, dev_res_1, size_x);
+
+        {
+            LOG_DURATION("classic variant");
+            double gamma = Gamma(v + 1);
+            BesselOneThread << <(size_x + 127) / 128, 128 >> > (v, dev_x, gamma, dev_res, size_x);
+            cudaGetLastError();
+            cudaDeviceSynchronize();
+        }
+        {
+            LOG_DURATION("reccurent");
+            cyl_next_order_OneThread <<<(size_x+127)/128, 128>>>(v-1, dev_x, dev_res_rec, size_x, dev_res_1, dev_res_0);
+            cudaGetLastError();
+            cudaDeviceSynchronize();
+        }
+
+    }
+
+    cudaMemcpy(res, dev_res, size_x * sizeof(double), cudaMemcpyDeviceToHost);
+    cudaMemcpy(res_rec, dev_res_rec, size_x * sizeof(double), cudaMemcpyDeviceToHost);
+
+
+    for (int i = 0; i < size_x; i++)
+    {
+        if (abs(res[i] - res_rec[i]) > 1E-12)
+        {
+            std::cout << "WARNING!!!" << std::endl;
+            std::cout << "TestJ0 failed!" << x[i] << " " << res[i] << " " << res_rec[i] << std::endl << std::endl;
+            break;
+        }
+    }
+
+    cudaFree(dev_res_0);
+    cudaFree(dev_x);
+}

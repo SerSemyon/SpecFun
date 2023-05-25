@@ -9,12 +9,12 @@
 #include <iostream> 
 #include <iomanip> 
 
-double epsilon = 1E-15;
-int nJ0 = 150;
-int nJ1 = 150;
-int nJ = 150;
-int nY0 = 150;
-int nY1 = 150;
+double epsilon = 1E-17;
+int nJ0 = 1000000;
+int nJ1 = 1000000;
+int nJ = 1000000;
+int nY0 = 10000000;
+int nY1 = 1000;
 double b0 = 15;
 double b1 = 15;
 double bJ = 15;
@@ -144,32 +144,32 @@ void TestNeumannCPU()
     std::cout << "TestNeumannCPU started" << std::endl;
     int v = 0;
     bool successfully = true;
-    double* res1 = new double[nY1];
-    double* res2 = new double[nY1];
-    double* x = new double[nY1];
-    for (int i = 0; i < nY1; i++)
+    double* res1 = new double[nY0];
+    double* res2 = new double[nY0];
+    double* x = new double[nY0];
+    for (int i = 0; i < nY0; i++)
     {
-        x[i] = i * hY1;
+        x[i] = i * hY0;
         res1[i] = __std_smf_cyl_neumann(v, x[i]);
     }
-    double* J_pos = new double[nY1];
-    double* J_neg = new double[nY1];
-    J(v, x, J_pos, nY1);
-    J_negative(v, J_neg, nY1, J_pos);
+    double* J_pos = new double[nY0];
+    double* J_neg = new double[nY0];
+    J(v, x, J_pos, nY0);
+    J_negative(v, J_neg, nY0, J_pos);
     {
         LOG_DURATION("Neumann");
-        Neumann(v, x, res2, nY1, J_pos, J_neg);
+        Neumann(v, x, res2,nY0, J_pos, J_neg);
     }
-    for (int i = 0; i < nY1; i++)
+    for (int i = 0; i < nY0; i++)
     {
-        std::cout << x[i] << " " << std::fixed << std::setprecision(10) << res1[i] << " " << res2[i] << std::endl;
-        /*if (abs(res1[i] - res2[i]) > 1E-4)
+        //std::cout << x[i] << " " << std::fixed << std::setprecision(10) << res1[i] << " " << res2[i] << std::endl;
+        if (abs(res1[i] - res2[i]) > 1E-4)
         {
             std::cout << "WARNING!!!" << std::endl;
             std::cout << "TestNeumannCPU failed!" << x[i] << " " << res1[i] << " " << res2[i] << std::endl << std::endl;
             successfully = false;
             break;
-        }*/
+        }
     }
     delete[] x;
     delete[] res1;
@@ -181,7 +181,7 @@ void TestNeumannCPU()
 void TestNeumann_CUDA()
 {
     std::cout << "TestNeumann_CUDA started" << std::endl;
-    int v = 2;
+    int v = 0;
     bool successfully = true;
     double* res1 = new double[nY0];
     double* res2 = new double[nY0];
@@ -204,7 +204,7 @@ void TestNeumann_CUDA()
     }
     for (int i = 0; i < nY0; i++)
     {
-        std::cout << x[i] << " " << res1[i] << " " << res2[i] << std::endl;
+        //std::cout << x[i] << " " << res1[i] << " " << res2[i] << std::endl;
         if (abs(res1[i] - res2[i]) > 1E-4)
         {
             std::cout << "WARNING!!!" << std::endl;
@@ -897,4 +897,27 @@ void Test_dZ()
     delete[] resGPU;
     if (successfully)
         std::cout << "Test_dZ OK" << std::endl << std::endl;
+}
+
+void Testrec_CUDA()
+{
+    std::cout << "Testrec_CUDA started" << std::endl;
+    int v = 2;
+    bool successfully = true;
+    double* res1 = new double[nJ1];
+    double* res2 = new double[nJ1];
+    double* x = new double[nJ1];
+    for (int i = 0; i < nJ1; i++)
+    {
+        x[i] = i * h1;
+    }
+    {
+        LOG_DURATION("J");
+        BesselWithCuda(v, x, res1, nJ1, 2);
+    }
+    delete[] x;
+    delete[] res1;
+    delete[] res2;
+    if (successfully)
+        std::cout << "TestJ1 OK" << std::endl << std::endl;
 }
