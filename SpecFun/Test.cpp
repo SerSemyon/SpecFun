@@ -181,7 +181,7 @@ void TestNeumannCPU()
 void TestNeumann_CUDA()
 {
     std::cout << "TestNeumann_CUDA started" << std::endl;
-    int v = 1;
+    int v = 2;
     bool successfully = true;
     double* res1 = new double[nY0];
     double* res2 = new double[nY0];

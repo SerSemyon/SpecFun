@@ -168,69 +168,100 @@ void Y1_CUDA(const double* const x, double* result, const unsigned int size, con
     cudaFree(dev_J1);
 }
 
-__global__ void Neumann_OneThread(double v, double* x, double* res, int size, double* Jpositive, double* Jnegative, unsigned int factV_minus_one, unsigned int factV)
+__global__ void Neumann_OneThread(double v, double* x, double* res, int size, double* Jpositive, double* Jnegative)
 {
-    const double epsilon = 1E-12;
-    const double C = 0.5772156;
     double arg = v * M_PI;
     int i = threadIdx.x + blockIdx.x * blockDim.x;
     while (i < size)
     {
-        if (v != (long long)v) // Если не целое
+        res[i] = (Jpositive[i] * cos(arg) - Jnegative[i]) / sin(arg);
+        i += blockDim.x * gridDim.x;
+    }
+}
+
+__global__ void Neumann_integer_OneThread(int v, double* x, double* res, int size, double* Jpositive, unsigned int factV_minus_one, unsigned int factV)
+{
+    const double epsilon = 1E-12;
+    const double C = 0.5772156;
+    int i = threadIdx.x + blockIdx.x * blockDim.x;
+    while (i < size)
+    {
+        double S_2 = 0;
+        int sign = 1;
+        double M = 1.0 / factV;
+        for (int i = 1; i <= v; i++)
         {
-            for (int i = 0; i < size; i++)
-            {
-                res[i] = (Jpositive[i] * cos(arg) - Jnegative[i]) / sin(arg);
-            }
+            S_2 += 1.0 / i;
         }
-        else
+        M *= S_2;
+        double sumWithPsi = M;
+        double prev;
+        double diff;
+        double cur = M;
+        double mul = 1.0 / factV;
+        int k = 1;
+        do {
+            prev = cur;
+            sign = -sign;
+            mul /= k * (v + k);
+            S_2 += 1.0 / k + 1.0 / (k + v);
+            M = sign * S_2 * mul;
+            cur = std::pow(0.5 * x[i], 2 * k) * M;
+            sumWithPsi += cur;
+            k++;
+            //if (k > max_iter)
+            //    break;
+            diff = abs(cur - prev);
+        } while (diff > epsilon);
+        sumWithPsi *= std::pow(0.5 * x[i], v);
+        double f_1 = factV_minus_one;
+        double S_1 = f_1;
+        for (int k = 1; k < v; k++)
         {
-            double S_2 = 0;
-            int sign = 1;
-            double M = 1.0 / factV;
-            for (int i = 1; i <= v; i++)
-            {
-                S_2 += 1.0 / i;
-            }
-            M *= S_2;
-            double sumWithPsi = M;
-            double prev;
-            double diff;
-            double cur = M;
-            double mul = 1.0 / factV;
-            int k = 1;
-            do {
-                prev = cur;
-                sign = -sign;
-                mul /= k * (v + k);
-                S_2 += 1.0 / k + 1.0 / (k + v);
-                M = sign * S_2 * mul;
-                cur = std::pow(0.5 * x[i], 2 * k) * M;
-                sumWithPsi += cur;
-                k++;
-                //if (k > max_iter)
-                //    break;
-                diff = abs(cur - prev);
-            } while (diff > epsilon);
-            sumWithPsi *= std::pow(0.5 * x[i], v);
-            double f_1 = factV_minus_one;
-            double S_1 = f_1;
-            for (int k = 1; k < v; k++)
-            {
-                double multiply = v - k - 1;
-                if (multiply != 0)
-                    f_1 *= multiply;
-                f_1 /= k;
-                S_1 += f_1 * std::pow(0.5 * x[i], 2 * k);
-            }
-            res[i] = 2 * Jpositive[i] * (std::log(0.5 * x[i]) + C);
-            res[i] -= sumWithPsi;
-            if (v > 0)
-                res[i] -= std::pow(0.5 * x[i], -v) * S_1;
-            res[i] /= M_PI;
+            double multiply = v - k - 1;
+            if (multiply != 0)
+                f_1 *= multiply;
+            f_1 /= k;
+            S_1 += f_1 * std::pow(0.5 * x[i], 2 * k);
         }
+        res[i] = 2 * Jpositive[i] * (std::log(0.5 * x[i]) + C);
+        res[i] -= sumWithPsi;
+        if (v > 0)
+            res[i] -= std::pow(0.5 * x[i], -v) * S_1;
+        res[i] /= M_PI;
         i += blockDim.x * gridDim.x;
     } 
+}
+
+void Neumann_CUDA(int v, const double* const x, double* result, const unsigned int size, const double* const Jpositive)
+{
+    double* dev_x = 0;
+    double* dev_res = 0;
+    double* dev_Jpositive = 0;
+
+    cudaMalloc((void**)&dev_x, size * sizeof(double));
+    cudaMemcpy(dev_x, x, size * sizeof(double), cudaMemcpyHostToDevice);
+
+    cudaMalloc((void**)&dev_res, size * sizeof(double));
+
+    cudaMalloc((void**)&dev_Jpositive, size * sizeof(double));
+    cudaMemcpy(dev_Jpositive, Jpositive, size * sizeof(double), cudaMemcpyHostToDevice);
+
+    {
+        LOG_DURATION("GPU without data transfers");
+        unsigned int factV_minus_one = Fact(v - 1);
+        unsigned int factV = Fact(v);
+        Neumann_integer_OneThread << <(size + 127) / 128, 128 >> > (v, dev_x, dev_res, size, dev_Jpositive, factV_minus_one, factV);
+
+        cudaGetLastError();
+        cudaDeviceSynchronize();
+    }
+
+    cudaMemcpy(result, dev_res, size * sizeof(double), cudaMemcpyDeviceToHost);
+
+    cudaFree(dev_res);
+    cudaFree(dev_x);
+    cudaFree(dev_Jpositive);
 }
 
 void Neumann_CUDA(double v, const double* const x, double* result, const unsigned int size, const double* const Jpositive, const double* const Jnegative)
@@ -251,12 +282,19 @@ void Neumann_CUDA(double v, const double* const x, double* result, const unsigne
     cudaMalloc((void**)&dev_Jnegative, size * sizeof(double));
     cudaMemcpy(dev_Jnegative, Jnegative, size * sizeof(double), cudaMemcpyHostToDevice);
 
-
     {
         LOG_DURATION("GPU without data transfers");
-        unsigned int factV_minus_one = Fact(v - 1);
-        unsigned int factV = factV_minus_one * v;
-        Neumann_OneThread << <(size + 127) / 128, 128 >> > (v, dev_x, dev_res, size, dev_Jpositive, dev_Jnegative, factV_minus_one, factV);
+
+        if (v != (long long)v) // Если не целое
+        {
+            Neumann_OneThread << <(size + 127) / 128, 128 >> > (v, dev_x, dev_res, size, dev_Jpositive, dev_Jnegative);
+        }
+        else
+        {
+            unsigned int factV_minus_one = Fact(v - 1);
+            unsigned int factV = Fact(v);
+            Neumann_integer_OneThread << <(size + 127) / 128, 128 >> > ((int)v, dev_x, dev_res, size, dev_Jpositive, factV_minus_one, factV);
+        }
 
         cudaGetLastError();
         cudaDeviceSynchronize();
